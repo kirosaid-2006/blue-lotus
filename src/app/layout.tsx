@@ -16,11 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className="h-full">
+    <html lang="ar" dir="rtl" className="h-full" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.jpg" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#040810] text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950">
+      <body
+        className="min-h-full flex flex-col bg-[#040810] text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
