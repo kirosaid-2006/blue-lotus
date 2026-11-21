@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, PromoCode, Order, OrderStatus, GovernorateShipping } from '../types';
 import { INITIAL_PRODUCTS, INITIAL_PROMO_CODES, INITIAL_ORDERS, INITIAL_GOVERNORATES } from '../data/initialData';
 
@@ -79,13 +79,13 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'blue_lotus_products_v2',
-  PROMO_CODES: 'blue_lotus_promo_codes_v2',
-  ORDERS: 'blue_lotus_orders_v2',
-  GOVERNORATES: 'blue_lotus_governorates_v2',
-  CART: 'blue_lotus_cart_v2',
-  ADMIN_PASSWORD: 'blue_lotus_admin_pwd_v2',
-  ADMIN_LOGGED_IN: 'blue_lotus_admin_auth_v2',
+  PRODUCTS: 'blue_lotus_products_v4',
+  PROMO_CODES: 'blue_lotus_promo_codes_v4',
+  ORDERS: 'blue_lotus_orders_v4',
+  GOVERNORATES: 'blue_lotus_governorates_v4',
+  CART: 'blue_lotus_cart_v4',
+  ADMIN_PASSWORD: 'blue_lotus_admin_pwd_v4',
+  ADMIN_LOGGED_IN: 'blue_lotus_admin_auth_v4',
 };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -100,15 +100,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'tracking'>('store');
 
-  // Admin Auth State
-  const [adminPassword, setAdminPassword] = useState<string>('admin123');
+  // Admin Auth State - Default password set to 'andro_abdo'
+  const [adminPassword, setAdminPassword] = useState<string>('andro_abdo');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
 
   // Initialize from LocalStorage
   useEffect(() => {
     try {
       const storedProds = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      if (storedProds) setProducts(JSON.parse(storedProds));
+      if (storedProds) {
+        setProducts(JSON.parse(storedProds));
+      } else {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+      }
 
       const storedCodes = localStorage.getItem(STORAGE_KEYS.PROMO_CODES);
       if (storedCodes) setPromoCodes(JSON.parse(storedCodes));
@@ -123,54 +127,49 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (storedCart) setCart(JSON.parse(storedCart));
 
       const storedPwd = localStorage.getItem(STORAGE_KEYS.ADMIN_PASSWORD);
-      if (storedPwd) setAdminPassword(storedPwd);
+      if (storedPwd) {
+        setAdminPassword(storedPwd);
+      } else {
+        localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, 'andro_abdo');
+      }
 
       const storedAuth = sessionStorage.getItem(STORAGE_KEYS.ADMIN_LOGGED_IN);
       if (storedAuth === 'true') setIsAdminLoggedIn(true);
     } catch (e) {
-      console.warn('LocalStorage error:', e);
+      console.warn('LocalStorage initialization error:', e);
     }
   }, []);
 
-  // Save changes
+  // Multi-Tab & Cross-Window Instant Sync
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [products]);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.newValue) return;
+      try {
+        if (e.key === STORAGE_KEYS.PRODUCTS) {
+          setProducts(JSON.parse(e.newValue));
+        } else if (e.key === STORAGE_KEYS.ORDERS) {
+          setOrders(JSON.parse(e.newValue));
+        } else if (e.key === STORAGE_KEYS.PROMO_CODES) {
+          setPromoCodes(JSON.parse(e.newValue));
+        } else if (e.key === STORAGE_KEYS.GOVERNORATES) {
+          setGovernorates(JSON.parse(e.newValue));
+        } else if (e.key === STORAGE_KEYS.ADMIN_PASSWORD) {
+          setAdminPassword(e.newValue);
+        }
+      } catch (err) {
+        console.error('Storage sync error:', err);
+      }
+    };
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROMO_CODES, JSON.stringify(promoCodes));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [promoCodes]);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [orders]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.GOVERNORATES, JSON.stringify(governorates));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [governorates]);
-
+  // Sync Cart
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }, [cart]);
 
   // Admin Auth functions
@@ -195,9 +194,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const changeAdminPassword = (newPassword: string) => {
     if (!newPassword.trim()) return;
-    setAdminPassword(newPassword.trim());
+    const cleanPwd = newPassword.trim();
+    setAdminPassword(cleanPwd);
     try {
-      localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, newPassword.trim());
+      localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, cleanPwd);
     } catch (e) {}
   };
 
@@ -252,27 +252,43 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   };
 
-  // Products CRUD
+  // Products CRUD with synchronous LocalStorage persistence
   const addProduct = (prodData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
       ...prodData,
       id: 'prod-' + Date.now(),
     };
-    setProducts((prev) => [newProduct, ...prev]);
+    setProducts((prev) => {
+      const updated = [newProduct, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const updateProduct = (id: string, updates: Partial<Product>) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-    );
+    setProducts((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setProducts((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     removeFromCart(id);
   };
 
-  // Promo Code CRUD
+  // Promo Code CRUD with synchronous LocalStorage persistence
   const addPromoCode = (codeData: Omit<PromoCode, 'id' | 'currentUses' | 'createdAt'>) => {
     const newCode: PromoCode = {
       ...codeData,
@@ -281,12 +297,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       currentUses: 0,
       createdAt: new Date().toISOString().split('T')[0],
     };
-    setPromoCodes((prev) => [newCode, ...prev]);
+    setPromoCodes((prev) => {
+      const updated = [newCode, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROMO_CODES, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const updatePromoCode = (id: string, updates: Partial<PromoCode>) => {
-    setPromoCodes((prev) =>
-      prev.map((c) =>
+    setPromoCodes((prev) => {
+      const updated = prev.map((c) =>
         c.id === id
           ? {
               ...c,
@@ -294,12 +316,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               code: updates.code ? updates.code.trim().toUpperCase() : c.code,
             }
           : c
-      )
-    );
+      );
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROMO_CODES, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const deletePromoCode = (id: string) => {
-    setPromoCodes((prev) => prev.filter((c) => c.id !== id));
+    setPromoCodes((prev) => {
+      const updated = prev.filter((c) => c.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROMO_CODES, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   // Validate Promo Code
@@ -342,7 +374,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   };
 
-  // Orders Management
+  // Orders Management with synchronous LocalStorage persistence
   const createOrder = (orderData: {
     customerName: string;
     customerPhone: string;
@@ -414,25 +446,37 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
     };
 
-    setProducts((prev) =>
-      prev.map((prod) => {
+    // Deduct stock
+    setProducts((prev) => {
+      const updated = prev.map((prod) => {
         const inCart = cart.find((c) => c.product.id === prod.id);
         if (inCart) {
           const remainingStock = Math.max(0, prod.stock - inCart.quantity);
           return { ...prod, stock: remainingStock };
         }
         return prod;
-      })
-    );
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
 
-    setOrders((prev) => [newOrder, ...prev]);
+    setOrders((prev) => {
+      const updated = [newOrder, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
     clearCart();
     return newOrder;
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((o) =>
+    setOrders((prev) => {
+      const updated = prev.map((o) =>
         o.id === orderId
           ? {
               ...o,
@@ -440,18 +484,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               updatedAt: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
             }
           : o
-      )
-    );
+      );
+      try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const deleteOrder = (orderId: string) => {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    setOrders((prev) => {
+      const updated = prev.filter((o) => o.id !== orderId);
+      try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const updateGovernorateCost = (id: string, newCost: number) => {
-    setGovernorates((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, cost: newCost } : g))
-    );
+    setGovernorates((prev) => {
+      const updated = prev.map((g) => (g.id === id ? { ...g, cost: newCost } : g));
+      try {
+        localStorage.setItem(STORAGE_KEYS.GOVERNORATES, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const generateWhatsAppLink = (order: Order): string => {

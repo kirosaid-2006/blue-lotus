@@ -36,14 +36,13 @@ export default function ProductCard({ product }: { product: Product }) {
       
       {/* Top badges */}
       <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4 bg-slate-900">
-        <Image
+        <img
           src={product.image}
           alt={product.name}
-          fill
-          className={`object-cover transition-transform duration-500 group-hover:scale-105 ${
+          className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
             isOutOfStock ? 'grayscale contrast-75 opacity-60' : ''
           }`}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          loading="lazy"
         />
 
         {/* Floating Badges */}

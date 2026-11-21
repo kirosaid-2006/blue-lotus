@@ -104,11 +104,10 @@ export default function CartDrawer() {
                 >
                   {/* Thumbnail */}
                   <div className="relative w-18 h-18 rounded-lg overflow-hidden shrink-0 border border-amber-500/30 bg-slate-900">
-                    <Image
+                    <img
                       src={item.product.image}
                       alt={item.product.name}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
 

@@ -28,6 +28,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Upload,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -163,8 +164,7 @@ export default function AdminDashboard() {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-amber-500/15 flex items-center justify-between text-xs text-slate-500">
-            <span>كلمة المرور الافتراضية: <strong className="text-amber-400 font-mono">admin123</strong></span>
+          <div className="pt-2 border-t border-amber-500/15 flex items-center justify-center text-xs text-slate-500">
             <button
               onClick={() => setCurrentView('store')}
               className="text-slate-400 hover:text-amber-300 underline font-bold"
@@ -235,6 +235,45 @@ export default function AdminDashboard() {
     }
     setIsAddProductOpen(false);
     resetProductForm();
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setNewProdImage(compressedDataUrl);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const openEditProduct = (prod: Product) => {
@@ -868,7 +907,7 @@ export default function AdminDashboard() {
                   >
                     <div className="flex gap-3">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-amber-500/30 bg-slate-900">
-                        <Image src={prod.image} alt={prod.name} fill className="object-cover" />
+                        <img src={prod.image} alt={prod.name} className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1 text-right">
@@ -1279,14 +1318,55 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-slate-200 font-bold mb-1">رابط صورة المنتج (Image URL)</label>
-                <input
-                  type="url"
-                  value={newProdImage}
-                  onChange={(e) => setNewProdImage(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#050b14] border border-amber-500/30 text-white focus:border-amber-400 focus:outline-none text-left"
-                />
+                <label className="block text-slate-200 font-bold mb-1">صورة المنتج *</label>
+                
+                <div className="space-y-2">
+                  {/* Image Preview */}
+                  {newProdImage && (
+                    <div className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-amber-400/80 bg-slate-900 mx-auto group shadow-md">
+                      <img
+                        src={newProdImage}
+                        alt="Product preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNewProdImage('')}
+                        className="absolute inset-0 bg-red-950/80 text-red-300 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold transition-opacity cursor-pointer"
+                      >
+                        إزالة الصورة
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Device File Upload Picker */}
+                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-amber-500/40 hover:border-amber-400 rounded-xl bg-[#050b14] cursor-pointer transition-colors group">
+                    <Upload className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform mb-1" />
+                    <span className="text-xs font-bold text-amber-300">
+                      اضغط لاختيار صورة من جهازك / موبايلك
+                    </span>
+                    <span className="text-[10px] text-slate-500 mt-0.5">
+                      يتم ضغط الصورة تلقائياً لتناسب التخزين وسرعة التصفح
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Or Direct Image Link Input */}
+                  <div>
+                    <input
+                      type="url"
+                      value={newProdImage.startsWith('data:') ? '' : newProdImage}
+                      onChange={(e) => setNewProdImage(e.target.value)}
+                      placeholder="أو ضع رابط صورة خارجي اختياري (URL)..."
+                      className="w-full px-3 py-1.5 rounded-lg bg-[#050b14] border border-amber-500/20 text-slate-300 text-[11px] focus:border-amber-400 focus:outline-none text-left"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
