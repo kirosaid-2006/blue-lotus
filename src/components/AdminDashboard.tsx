@@ -14,20 +14,20 @@ import {
   MessageSquare,
   CheckCircle,
   Clock,
-  Send,
   Plus,
   Trash2,
   Edit,
   Search,
-  Filter,
   DollarSign,
   Users,
-  ShieldAlert,
-  ArrowUpRight,
-  Sparkles,
-  Layers,
-  ChevronDown,
+  ShieldCheck,
   X,
+  Lock,
+  LogOut,
+  KeyRound,
+  Eye,
+  EyeOff,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -48,7 +48,23 @@ export default function AdminDashboard() {
     updateGovernorateCost,
     setFreeShippingThreshold,
     generateWhatsAppLink,
+    isAdminLoggedIn,
+    loginAdmin,
+    logoutAdmin,
+    changeAdminPassword,
+    clearAllOrders,
+    setCurrentView,
   } = useStore();
+
+  // Login form state
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Change Password Modal
+  const [isChangePwdOpen, setIsChangePwdOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [pwdChangedSuccess, setPwdChangedSuccess] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'orders' | 'analytics' | 'products' | 'promos' | 'shipping'>('orders');
 
@@ -84,10 +100,87 @@ export default function AdminDashboard() {
   const [newCodeCommType, setNewCodeCommType] = useState<'percentage' | 'fixed'>('fixed');
   const [newCodeCommValue, setNewCodeCommValue] = useState<number>(40);
 
+  // Handle Login
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    const success = loginAdmin(passwordInput);
+    if (!success) {
+      setLoginError('كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى');
+    } else {
+      setPasswordInput('');
+    }
+  };
+
+  // If NOT logged in, show Password Protected Screen
+  if (!isAdminLoggedIn) {
+    return (
+      <div className="min-h-[75vh] flex items-center justify-center px-4 py-16 bg-[#040810]">
+        <div className="w-full max-w-md p-8 rounded-3xl bg-gradient-to-b from-[#0c1a2e] to-[#060e1a] border border-amber-500/40 shadow-2xl space-y-6 text-center">
+          
+          <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-xl font-black text-white">لوحة تحكم الإدارة</h2>
+            <p className="text-xs text-slate-400">
+              هذه الصفحة مخصصة لمالك المتجر فقط، أدخل كلمة المرور للدخول
+            </p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
+            {loginError && (
+              <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs flex items-center gap-2 text-right">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                placeholder="أدخل كلمة المرور..."
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-[#050b14] border border-amber-500/30 text-white placeholder-slate-500 text-sm text-center font-mono focus:border-amber-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-3 text-slate-400 hover:text-white"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-sm shadow-md hover:brightness-110 transition-all cursor-pointer"
+            >
+              دخول لوحة الأدمن
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-amber-500/15 flex items-center justify-between text-xs text-slate-500">
+            <span>كلمة المرور الافتراضية: <strong className="text-amber-400 font-mono">admin123</strong></span>
+            <button
+              onClick={() => setCurrentView('store')}
+              className="text-slate-400 hover:text-amber-300 underline font-bold"
+            >
+              العودة للمتجر
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   // Stats Calculations
   const totalSales = orders.reduce((sum, o) => (o.status !== 'cancelled' ? sum + o.total : sum), 0);
   const pendingOrdersCount = orders.filter((o) => o.status === 'pending').length;
-  const confirmedOrdersCount = orders.filter((o) => o.status === 'confirmed').length;
   const deliveredOrdersCount = orders.filter((o) => o.status === 'delivered').length;
   const totalCommissionsOwed = orders.reduce((sum, o) => {
     if (o.status !== 'cancelled' && o.marketerCommission) {
@@ -236,7 +329,7 @@ export default function AdminDashboard() {
       case 'pending':
         return (
           <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1">
-            <Clock className="w-3 h-3 animate-spin" style={{ animationDuration: '4s' }} />
+            <Clock className="w-3 h-3" />
             جديد (بانتظار التأكيد)
           </span>
         );
@@ -244,14 +337,14 @@ export default function AdminDashboard() {
         return (
           <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold flex items-center gap-1">
             <CheckCircle className="w-3 h-3" />
-            تم التأكيد هاتفياً
+            تم التأكيد
           </span>
         );
       case 'preparing':
         return (
           <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-bold flex items-center gap-1">
             <Package className="w-3 h-3" />
-            قيد التجهيز والتغليف
+            قيد التجهيز
           </span>
         );
       case 'shipping':
@@ -271,7 +364,7 @@ export default function AdminDashboard() {
       case 'cancelled':
         return (
           <span className="px-2.5 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 text-xs font-bold">
-            ملغي / لم يتم الرد
+            ملغي
           </span>
         );
       case 'returned':
@@ -293,28 +386,38 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
-              لوحة التحكم الملكية • Blue Lotus Admin
+              لوحة تحكم المتجر (الأدمن)
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              إدارة الطلبات، تأكيد الواتساب بضغطة زر، المخزون، والمسوقين
+              متابعة الطلبات، تأكيد الواتساب، إدارة المنتجات والمسوقين
             </p>
           </div>
 
-          {/* Quick Metrics Bar */}
+          {/* Quick Metrics Bar & Controls */}
           <div className="flex items-center gap-2 sm:gap-3 text-xs">
             <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center gap-2">
-              <span className="font-bold">أوردرات معلقة:</span>
+              <span className="font-bold">أوردرات جديدة:</span>
               <span className="font-mono font-black text-amber-400 px-1.5 py-0.5 rounded-full bg-amber-500/20">
                 {pendingOrdersCount}
               </span>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center gap-2">
-              <span className="font-bold">مبيعات:</span>
-              <span className="font-mono font-black text-emerald-400">
-                {totalSales} ج.م
-              </span>
-            </div>
+            <button
+              onClick={() => setIsChangePwdOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 flex items-center gap-1 font-bold"
+              title="تغيير كلمة المرور"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+              <span>الباسورد</span>
+            </button>
+
+            <button
+              onClick={logoutAdmin}
+              className="px-3 py-1.5 rounded-xl bg-red-950/80 text-red-300 hover:bg-red-900 border border-red-500/40 flex items-center gap-1 font-bold"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>خروج</span>
+            </button>
           </div>
         </div>
       </div>
@@ -325,7 +428,7 @@ export default function AdminDashboard() {
           
           <button
             onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'orders'
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
@@ -342,7 +445,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'analytics'
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
@@ -354,7 +457,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('products')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'products'
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
@@ -366,7 +469,7 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('promos')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'promos'
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
@@ -378,14 +481,14 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('shipping')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 ${
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'shipping'
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
             }`}
           >
             <Truck className="w-4 h-4" />
-            <span>أسعار الشحن للمحافظات ({governorates.length})</span>
+            <span>أسعار الشحن للمحافظات</span>
           </button>
 
         </div>
@@ -427,7 +530,7 @@ export default function AdminDashboard() {
                   <button
                     key={st.id}
                     onClick={() => setOrderStatusFilter(st.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
                       orderStatusFilter === st.id
                         ? 'bg-amber-500/20 text-amber-300 border border-amber-400/80'
                         : 'bg-slate-800/40 text-slate-400 hover:text-white'
@@ -442,8 +545,12 @@ export default function AdminDashboard() {
 
             {/* Orders List */}
             {filteredOrders.length === 0 ? (
-              <div className="text-center py-16 bg-[#091526]/40 rounded-2xl border border-amber-500/10">
-                <p className="text-slate-400 text-sm font-bold">لا توجد طلبات مطابقة للبحث</p>
+              <div className="text-center py-16 bg-[#091526]/40 rounded-2xl border border-amber-500/10 space-y-2">
+                <ShoppingBag className="w-10 h-10 mx-auto text-slate-600 mb-2" />
+                <p className="text-slate-300 text-sm font-bold">لا توجد طلبات مسجلة حالياً</p>
+                <p className="text-xs text-slate-500">
+                  بمجرد أن يقوم العميل بطلب منتج من المتجر، سيظهر هنا فوراً مع بياناته ورقم هاتفه وزر الواتساب.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -495,11 +602,11 @@ export default function AdminDashboard() {
                         {/* Delete Order */}
                         <button
                           onClick={() => {
-                            if (confirm('هل أنت متأكد من حذف هذا الأوردر نهائياً؟')) {
+                            if (confirm('هل أنت متأكد من حذف هذا الأوردر؟')) {
                               deleteOrder(order.id);
                             }
                           }}
-                          className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                           title="حذف الأوردر"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -513,7 +620,7 @@ export default function AdminDashboard() {
                       
                       {/* Customer Details */}
                       <div className="space-y-1.5 text-right">
-                        <p className="text-slate-400 font-bold">بيانات العميل والشحن:</p>
+                        <p className="text-slate-400 font-bold">بيانات العميل:</p>
                         <p className="text-white text-sm font-black">{order.customerName}</p>
                         <p className="text-amber-300 font-bold">المحافظة: {order.governorate}</p>
                         <p className="text-slate-300">العنوان: {order.address}</p>
@@ -582,7 +689,7 @@ export default function AdminDashboard() {
                             <option value="preparing">قيد التجهيز والتغليف</option>
                             <option value="shipping">في الطريق مع المندوب</option>
                             <option value="delivered">تم التسليم بنجاح</option>
-                            <option value="cancelled">ملغي / لم يتم الرد</option>
+                            <option value="cancelled">ملغي</option>
                             <option value="returned">مرتجع</option>
                           </select>
                         </div>
@@ -658,61 +765,67 @@ export default function AdminDashboard() {
                 <span>أداء المسوقين والعمولات المكتسبة (Affiliate Marketers)</span>
               </h3>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs">
-                  <thead>
-                    <tr className="border-b border-amber-500/20 text-slate-400">
-                      <th className="py-2.5 px-3">اسم المسوق</th>
-                      <th className="py-2.5 px-3">الكود</th>
-                      <th className="py-2.5 px-3">مرات الاستخدام</th>
-                      <th className="py-2.5 px-3">الحد الأقصى</th>
-                      <th className="py-2.5 px-3">نسبة أو قيمة الخصم</th>
-                      <th className="py-2.5 px-3">العمولة لكل أوردر</th>
-                      <th className="py-2.5 px-3">إجمالي أرباحه</th>
-                      <th className="py-2.5 px-3">تواصل</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-amber-500/10">
-                    {promoCodes.map((code) => {
-                      const totalEarnings =
-                        code.commissionType === 'fixed'
-                          ? code.currentUses * code.commissionValue
-                          : 'متغير حسب السعر';
+              {promoCodes.length === 0 ? (
+                <p className="text-slate-400 text-xs text-center py-6">
+                  لم تقم بإنشاء أي برومو كود لمسوقين بعد. يمكنك إضافة كود جديد من تبويب "البرومو كود والمسوقين".
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead>
+                      <tr className="border-b border-amber-500/20 text-slate-400">
+                        <th className="py-2.5 px-3">اسم المسوق</th>
+                        <th className="py-2.5 px-3">الكود</th>
+                        <th className="py-2.5 px-3">مرات الاستخدام</th>
+                        <th className="py-2.5 px-3">الحد الأقصى</th>
+                        <th className="py-2.5 px-3">نسبة أو قيمة الخصم</th>
+                        <th className="py-2.5 px-3">العمولة لكل أوردر</th>
+                        <th className="py-2.5 px-3">إجمالي أرباحه</th>
+                        <th className="py-2.5 px-3">تواصل</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-amber-500/10">
+                      {promoCodes.map((code) => {
+                        const totalEarnings =
+                          code.commissionType === 'fixed'
+                            ? code.currentUses * code.commissionValue
+                            : 'متغير حسب السعر';
 
-                      return (
-                        <tr key={code.id} className="hover:bg-white/5">
-                          <td className="py-3 px-3 font-bold text-white">{code.marketerName}</td>
-                          <td className="py-3 px-3 font-mono text-amber-300 font-bold">{code.code}</td>
-                          <td className="py-3 px-3 font-mono font-bold">{code.currentUses}</td>
-                          <td className="py-3 px-3 text-slate-400">{code.maxUses}</td>
-                          <td className="py-3 px-3 text-emerald-400 font-bold">
-                            {code.discountValue} {code.discountType === 'percentage' ? '%' : 'ج.م'}
-                          </td>
-                          <td className="py-3 px-3 text-amber-300 font-bold">
-                            {code.commissionValue} {code.commissionType === 'percentage' ? '%' : 'ج.م'}
-                          </td>
-                          <td className="py-3 px-3 text-emerald-300 font-black font-mono">
-                            {totalEarnings} ج.م
-                          </td>
-                          <td className="py-3 px-3">
-                            <a
-                              href={`https://wa.me/2${code.marketerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                                `أهلاً يا ${code.marketerName}، تقرير مبيعات كودك (${code.code}) في متجر Blue Lotus: تم استخدام كودك ${code.currentUses} مرة بإجمالي عمولة ${totalEarnings} ج.م!`
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold hover:bg-emerald-500/30 flex items-center gap-1 w-max"
-                            >
-                              <MessageSquare className="w-3 h-3" />
-                              <span>واتساب</span>
-                            </a>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                        return (
+                          <tr key={code.id} className="hover:bg-white/5">
+                            <td className="py-3 px-3 font-bold text-white">{code.marketerName}</td>
+                            <td className="py-3 px-3 font-mono text-amber-300 font-bold">{code.code}</td>
+                            <td className="py-3 px-3 font-mono font-bold">{code.currentUses}</td>
+                            <td className="py-3 px-3 text-slate-400">{code.maxUses}</td>
+                            <td className="py-3 px-3 text-emerald-400 font-bold">
+                              {code.discountValue} {code.discountType === 'percentage' ? '%' : 'ج.م'}
+                            </td>
+                            <td className="py-3 px-3 text-amber-300 font-bold">
+                              {code.commissionValue} {code.commissionType === 'percentage' ? '%' : 'ج.م'}
+                            </td>
+                            <td className="py-3 px-3 text-emerald-300 font-black font-mono">
+                              {totalEarnings} ج.م
+                            </td>
+                            <td className="py-3 px-3">
+                              <a
+                                href={`https://wa.me/2${code.marketerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                                  `أهلاً يا ${code.marketerName}، تقرير مبيعات كودك (${code.code}): تم استخدام كودك ${code.currentUses} مرة بإجمالي عمولة ${totalEarnings} ج.م!`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold hover:bg-emerald-500/30 flex items-center gap-1 w-max"
+                              >
+                                <MessageSquare className="w-3 h-3" />
+                                <span>واتساب</span>
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
           </div>
@@ -726,7 +839,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-black text-white">إدارة المنتجات والمخزون</h3>
-                <p className="text-xs text-slate-400">أضف منتجات جديدة أو عدّل الأسعار والكميات في أي وقت بدون لمس الكود</p>
+                <p className="text-xs text-slate-400">أضف منتجات جديدة، عدّل الأسعار والمخزون، أو احذف منتجات في أي وقت</p>
               </div>
 
               <button
@@ -779,7 +892,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => updateProduct(prod.id, { stock: Math.max(0, prod.stock - 1) })}
-                          className="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-black"
+                          className="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-black cursor-pointer"
                         >
                           -
                         </button>
@@ -790,7 +903,7 @@ export default function AdminDashboard() {
 
                         <button
                           onClick={() => updateProduct(prod.id, { stock: prod.stock + 1 })}
-                          className="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-black"
+                          className="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-black cursor-pointer"
                         >
                           +
                         </button>
@@ -807,7 +920,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2 pt-2 border-t border-amber-500/15">
                       <button
                         onClick={() => openEditProduct(prod)}
-                        className="flex-1 py-2 rounded-lg bg-[#0f2542] hover:bg-[#163864] text-amber-200 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1"
+                        className="flex-1 py-2 rounded-lg bg-[#0f2542] hover:bg-[#163864] text-amber-200 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <Edit className="w-3.5 h-3.5" />
                         <span>تعديل</span>
@@ -819,7 +932,7 @@ export default function AdminDashboard() {
                             deleteProduct(prod.id);
                           }
                         }}
-                        className="p-2 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-500/30"
+                        className="p-2 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-500/30 cursor-pointer"
                         title="حذف المنتج"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -856,105 +969,115 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {promoCodes.map((code) => {
-                const isExpired = new Date(code.expiryDate) < new Date();
-                const isLimitReached = code.currentUses >= code.maxUses;
+            {promoCodes.length === 0 ? (
+              <div className="text-center py-16 bg-[#091526]/40 rounded-2xl border border-amber-500/10 space-y-2">
+                <Tag className="w-10 h-10 mx-auto text-slate-600 mb-2" />
+                <p className="text-slate-300 text-sm font-bold">لا يوجد أي برومو كود حالياً</p>
+                <p className="text-xs text-slate-500">
+                  اضغط على زر "إنشاء كود جديد" لإنشاء كود خصم خاص بمسوق محدد باسمه وعمولته.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {promoCodes.map((code) => {
+                  const isExpired = new Date(code.expiryDate) < new Date();
+                  const isLimitReached = code.currentUses >= code.maxUses;
 
-                return (
-                  <div
-                    key={code.id}
-                    className={`p-5 rounded-2xl bg-[#0a182b] border ${
-                      !code.isActive || isExpired || isLimitReached
-                        ? 'border-slate-700 opacity-70'
-                        : 'border-amber-500/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
-                    } space-y-4 text-right`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-lg font-black text-amber-300 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                        {code.code}
-                      </span>
-                      <button
-                        onClick={() => updatePromoCode(code.id, { isActive: !code.isActive })}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                          code.isActive
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        {code.isActive ? 'مفعّل' : 'معطّل'}
-                      </button>
-                    </div>
-
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">اسم المسوق:</span>
-                        <span className="text-white font-bold">{code.marketerName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">هاتف المسوق:</span>
-                        <span className="text-amber-300 font-mono">{code.marketerPhone}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">قيمة الخصم للعميل:</span>
-                        <span className="text-emerald-400 font-bold">
-                          {code.discountValue} {code.discountType === 'percentage' ? '%' : 'ج.م'}
+                  return (
+                    <div
+                      key={code.id}
+                      className={`p-5 rounded-2xl bg-[#0a182b] border ${
+                        !code.isActive || isExpired || isLimitReached
+                          ? 'border-slate-700 opacity-70'
+                          : 'border-amber-500/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
+                      } space-y-4 text-right`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-lg font-black text-amber-300 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                          {code.code}
                         </span>
+                        <button
+                          onClick={() => updatePromoCode(code.id, { isActive: !code.isActive })}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                            code.isActive
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          {code.isActive ? 'مفعّل' : 'معطّل'}
+                        </button>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">عمولة المسوق لكل أوردر:</span>
-                        <span className="text-amber-300 font-bold">
-                          {code.commissionValue} {code.commissionType === 'percentage' ? '%' : 'ج.م'}
-                        </span>
+
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">اسم المسوق:</span>
+                          <span className="text-white font-bold">{code.marketerName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">هاتف المسوق:</span>
+                          <span className="text-amber-300 font-mono">{code.marketerPhone}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">قيمة الخصم للعميل:</span>
+                          <span className="text-emerald-400 font-bold">
+                            {code.discountValue} {code.discountType === 'percentage' ? '%' : 'ج.م'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">عمولة المسوق لكل أوردر:</span>
+                          <span className="text-amber-300 font-bold">
+                            {code.commissionValue} {code.commissionType === 'percentage' ? '%' : 'ج.م'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">تاريخ الانتهاء:</span>
+                          <span className="text-slate-300 font-mono">{code.expiryDate}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">تاريخ الانتهاء:</span>
-                        <span className="text-slate-300 font-mono">{code.expiryDate}</span>
+
+                      {/* Usage Progress */}
+                      <div className="space-y-1.5 pt-2 border-t border-amber-500/15">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-slate-400">مرات الاستخدام:</span>
+                          <span className="text-amber-400 font-mono font-bold">
+                            {code.currentUses} / {code.maxUses}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400"
+                            style={{ width: `${Math.min(100, (code.currentUses / code.maxUses) * 100)}%` }}
+                          />
+                        </div>
                       </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          onClick={() => openEditPromo(code)}
+                          className="flex-1 py-2 rounded-lg bg-[#0f2542] hover:bg-[#163864] text-amber-200 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>تعديل</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (confirm(`حذف كود الخصم "${code.code}"؟`)) {
+                              deletePromoCode(code.id);
+                            }
+                          }}
+                          className="p-2 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-500/30 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
                     </div>
-
-                    {/* Usage Progress */}
-                    <div className="space-y-1.5 pt-2 border-t border-amber-500/15">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">مرات الاستخدام:</span>
-                        <span className="text-amber-400 font-mono font-bold">
-                          {code.currentUses} / {code.maxUses}
-                        </span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-amber-500 to-yellow-400"
-                          style={{ width: `${Math.min(100, (code.currentUses / code.maxUses) * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-2">
-                      <button
-                        onClick={() => openEditPromo(code)}
-                        className="flex-1 py-2 rounded-lg bg-[#0f2542] hover:bg-[#163864] text-amber-200 text-xs font-bold border border-amber-500/30 flex items-center justify-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                        <span>تعديل</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          if (confirm(`حذف كود الخصم "${code.code}"؟`)) {
-                            deletePromoCode(code.id);
-                          }
-                        }}
-                        className="p-2 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-500/30"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
           </div>
         )}
@@ -966,7 +1089,7 @@ export default function AdminDashboard() {
             {/* Free Shipping Threshold Setting */}
             <div className="p-5 rounded-2xl bg-[#091526]/80 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm sm:text-base font-black text-white">حد الشحن المجاني (Free Shipping Threshold)</h3>
+                <h3 className="text-sm sm:text-base font-black text-white">حد الشحن المجاني</h3>
                 <p className="text-xs text-slate-400">لو إجمالي مشتريات العميل وصلت لهذا الرقم، يحصل تلقائياً على شحن مجاني لكافة المحافظات</p>
               </div>
 
@@ -1012,17 +1135,69 @@ export default function AdminDashboard() {
 
       </div>
 
+      {/* MODAL: CHANGE ADMIN PASSWORD */}
+      {isChangePwdOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-sm bg-[#0c1a2e] border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-4 text-center">
+            <h3 className="text-base font-black text-white">تغيير كلمة مرور لوحة الأدمن</h3>
+            
+            {pwdChangedSuccess ? (
+              <div className="p-4 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs rounded-xl font-bold">
+                تم تغيير كلمة المرور بنجاح!
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <input
+                  type="password"
+                  placeholder="أدخل كلمة المرور الجديدة..."
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#050b14] border border-amber-500/30 text-white text-center font-mono text-sm focus:border-amber-400 focus:outline-none"
+                />
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsChangePwdOpen(false)}
+                    className="w-1/3 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (newPassword.trim().length >= 4) {
+                        changeAdminPassword(newPassword);
+                        setPwdChangedSuccess(true);
+                        setTimeout(() => {
+                          setPwdChangedSuccess(false);
+                          setIsChangePwdOpen(false);
+                          setNewPassword('');
+                        }, 1500);
+                      } else {
+                        alert('يرجى إدخال كلمة مرور مكونة من 4 خانات على الأقل');
+                      }
+                    }}
+                    className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-xs font-black hover:brightness-110 cursor-pointer"
+                  >
+                    حفظ الكلمة الجديدة
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* MODAL: ADD / EDIT PRODUCT */}
       {isAddProductOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="relative w-full max-w-lg bg-[#0c1a2e] border border-amber-500/40 rounded-3xl p-6 shadow-2xl my-8">
             <div className="flex items-center justify-between pb-4 border-b border-amber-500/20 mb-4">
               <h3 className="text-lg font-black text-white">
-                {editingProduct ? 'تعديل بيانات المنتج' : 'إضافة منتج ملكي جديد'}
+                {editingProduct ? 'تعديل بيانات المنتج' : 'إضافة منتج جديد'}
               </h3>
               <button
                 onClick={() => setIsAddProductOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1030,7 +1205,7 @@ export default function AdminDashboard() {
 
             <form onSubmit={handleSaveProduct} className="space-y-4 text-right text-xs">
               <div>
-                <label className="block text-slate-200 font-bold mb-1">اسم المنتج بالعربية *</label>
+                <label className="block text-slate-200 font-bold mb-1">اسم المنتج *</label>
                 <input
                   type="text"
                   required
@@ -1130,13 +1305,13 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsAddProductOpen(false)}
-                  className="w-1/3 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-bold"
+                  className="w-1/3 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-bold cursor-pointer"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-md hover:brightness-110"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-md hover:brightness-110 cursor-pointer"
                 >
                   حفظ المنتج
                 </button>
@@ -1156,7 +1331,7 @@ export default function AdminDashboard() {
               </h3>
               <button
                 onClick={() => setIsAddPromoOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1279,13 +1454,13 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsAddPromoOpen(false)}
-                  className="w-1/3 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-bold"
+                  className="w-1/3 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-bold cursor-pointer"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-md hover:brightness-110"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-md hover:brightness-110 cursor-pointer"
                 >
                   حفظ البرومو كود
                 </button>

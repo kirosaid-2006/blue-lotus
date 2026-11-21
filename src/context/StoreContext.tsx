@@ -29,9 +29,14 @@ interface StoreContextType {
   setIsCheckoutOpen: (open: boolean) => void;
   currentView: 'store' | 'admin' | 'tracking';
   setCurrentView: (view: 'store' | 'admin' | 'tracking') => void;
-  selectedProductForQuickView: Product | null;
-  setSelectedProductForQuickView: (prod: Product | null) => void;
   
+  // Admin Auth
+  isAdminLoggedIn: boolean;
+  loginAdmin: (password: string) => boolean;
+  logoutAdmin: () => void;
+  changeAdminPassword: (newPassword: string) => void;
+  clearAllOrders: () => void;
+
   // Cart Actions
   addToCart: (product: Product, quantity?: number) => boolean;
   removeFromCart: (productId: string) => void;
@@ -74,11 +79,13 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'blue_lotus_products_v1',
-  PROMO_CODES: 'blue_lotus_promo_codes_v1',
-  ORDERS: 'blue_lotus_orders_v1',
-  GOVERNORATES: 'blue_lotus_governorates_v1',
-  CART: 'blue_lotus_cart_v1',
+  PRODUCTS: 'blue_lotus_products_v2',
+  PROMO_CODES: 'blue_lotus_promo_codes_v2',
+  ORDERS: 'blue_lotus_orders_v2',
+  GOVERNORATES: 'blue_lotus_governorates_v2',
+  CART: 'blue_lotus_cart_v2',
+  ADMIN_PASSWORD: 'blue_lotus_admin_pwd_v2',
+  ADMIN_LOGGED_IN: 'blue_lotus_admin_auth_v2',
 };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -92,7 +99,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'tracking'>('store');
-  const [selectedProductForQuickView, setSelectedProductForQuickView] = useState<Product | null>(null);
+
+  // Admin Auth State
+  const [adminPassword, setAdminPassword] = useState<string>('admin123');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
 
   // Initialize from LocalStorage
   useEffect(() => {
@@ -111,6 +121,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const storedCart = localStorage.getItem(STORAGE_KEYS.CART);
       if (storedCart) setCart(JSON.parse(storedCart));
+
+      const storedPwd = localStorage.getItem(STORAGE_KEYS.ADMIN_PASSWORD);
+      if (storedPwd) setAdminPassword(storedPwd);
+
+      const storedAuth = sessionStorage.getItem(STORAGE_KEYS.ADMIN_LOGGED_IN);
+      if (storedAuth === 'true') setIsAdminLoggedIn(true);
     } catch (e) {
       console.warn('LocalStorage error:', e);
     }
@@ -156,6 +172,41 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error(e);
     }
   }, [cart]);
+
+  // Admin Auth functions
+  const loginAdmin = (enteredPassword: string): boolean => {
+    if (enteredPassword.trim() === adminPassword.trim()) {
+      setIsAdminLoggedIn(true);
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.ADMIN_LOGGED_IN, 'true');
+      } catch (e) {}
+      return true;
+    }
+    return false;
+  };
+
+  const logoutAdmin = () => {
+    setIsAdminLoggedIn(false);
+    try {
+      sessionStorage.removeItem(STORAGE_KEYS.ADMIN_LOGGED_IN);
+    } catch (e) {}
+    setCurrentView('store');
+  };
+
+  const changeAdminPassword = (newPassword: string) => {
+    if (!newPassword.trim()) return;
+    setAdminPassword(newPassword.trim());
+    try {
+      localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, newPassword.trim());
+    } catch (e) {}
+  };
+
+  const clearAllOrders = () => {
+    setOrders([]);
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
+    } catch (e) {}
+  };
 
   // Cart operations
   const addToCart = (product: Product, quantity = 1): boolean => {
@@ -316,21 +367,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         validPromoCode = val.promoCode;
         marketerName = val.promoCode.marketerName;
         
-        // Calculate marketer commission
         if (val.promoCode.commissionType === 'percentage') {
           marketerCommission = Math.round((subtotal * val.promoCode.commissionValue) / 100);
         } else {
           marketerCommission = val.promoCode.commissionValue;
         }
 
-        // Increment usage count of this promo code
         updatePromoCode(val.promoCode.id, {
           currentUses: val.promoCode.currentUses + 1,
         });
       }
     }
 
-    // Determine shipping cost
     const govObj = governorates.find((g) => g.nameAr === orderData.governorate);
     const standardCost = govObj ? govObj.cost : 60;
     const shippingCost = subtotal >= freeShippingThreshold ? 0 : standardCost;
@@ -366,7 +414,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }),
     };
 
-    // Deduct stock for ordered products
     setProducts((prev) =>
       prev.map((prod) => {
         const inCart = cart.find((c) => c.product.id === prod.id);
@@ -407,9 +454,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  // Pre-formatted Egyptian WhatsApp Message
   const generateWhatsAppLink = (order: Order): string => {
-    // Format Egyptian phone number to international 20...
     let cleanPhone = (order.customerWhatsapp || order.customerPhone).replace(/\D/g, '');
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '2' + cleanPhone;
@@ -426,7 +471,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       : '';
 
     const message = `أهلاً بحضرتك يا فندم *${order.customerName}* 🌸👑
-مع حضرتك إدارة براند *Blue Lotus* الملكي.
+مع حضرتك إدارة براند *Blue Lotus*.
 
 بنتواصل مع حضرتك لتأكيد تفاصيل طلبك رقم *#${order.orderNumber}*:
 ----------------------------------
@@ -436,7 +481,7 @@ ${itemsList}${promoLine}
 📍 محافظة: *${order.governorate}*
 🏠 العنوان: ${order.address}
 ${order.notes ? `📝 ملاحظات: ${order.notes}\n` : ''}----------------------------------
-من فضلك أكد لنا مناسبة البيانات لنبدأ تجهيز وتغليف شحنتك الملكية على الفور؟ ✨`;
+من فضلك أكد لنا مناسبة البيانات لنبدأ تجهيز وتغليف شحنتك على الفور؟ ✨`;
 
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
@@ -456,8 +501,11 @@ ${order.notes ? `📝 ملاحظات: ${order.notes}\n` : ''}-------------------
         setIsCheckoutOpen,
         currentView,
         setCurrentView,
-        selectedProductForQuickView,
-        setSelectedProductForQuickView,
+        isAdminLoggedIn,
+        loginAdmin,
+        logoutAdmin,
+        changeAdminPassword,
+        clearAllOrders,
         addToCart,
         removeFromCart,
         updateCartQuantity,
