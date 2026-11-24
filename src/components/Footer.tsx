@@ -25,7 +25,7 @@ export default function Footer() {
     } else if (!clean.startsWith('20') && clean.length === 10) {
       clean = '20' + clean;
     }
-    return `https://wa.me/${clean}?text=${encodeURIComponent('أهلاً، أرغب في الاستفسار بخصوص منتجات متجر Blue Lotus 🌸')}`;
+    return `https://wa.me/${clean}?text=${encodeURIComponent('أهلاً، أرغب في الاستفسار بخصوص منتجات متجر Blue Lotus Skincare 🌸')}`;
   };
 
   const renderSocialIcon = (platform: SocialPlatform) => {
@@ -92,7 +92,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#03060c] border-t border-amber-500/20 text-slate-400 text-xs text-right pt-10 pb-6">
+    <footer className="bg-[#0D2B55] border-t border-[#D4AF37]/30 text-slate-300 text-xs text-right pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -100,24 +100,24 @@ export default function Footer() {
           {/* Col 1: Brand */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-full overflow-hidden border border-amber-400/80">
-                <Image src="/logo.jpg" alt="Blue Lotus Logo" fill className="object-cover" />
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#D4AF37] bg-white p-0.5 shrink-0 shadow-sm">
+                <Image src="/logo.jpg" alt="Blue Lotus Logo" fill className="object-contain rounded-full" />
               </div>
               <div>
-                <h3 className="text-base font-serif font-bold text-amber-300 tracking-wider">
+                <h3 className="text-base font-serif font-black text-white tracking-widest">
                   BLUE LOTUS
                 </h3>
-                <p className="text-[10px] text-slate-500">المتجر الرسمي</p>
+                <p className="text-[10px] text-[#D4AF37] font-bold">SKINCARE • براند العناية الطبيعية</p>
               </div>
             </div>
-            <p className="text-slate-400 leading-relaxed text-[11px] max-w-sm">
-              أجود المنتجات العصرية والفاخرة. شحن سريع ومباشر لكافة محافظات جمهورية مصر العربية.
+            <p className="text-slate-300 leading-relaxed text-[11px] max-w-sm">
+              مستخلصات وزيوت زهرة اللوتس الزرقاء النقية لترطيب عميق ونعومة تدوم. شحن سريع ومباشر لكافة محافظات جمهورية مصر العربية.
             </p>
 
             {/* Social Media Links from Admin */}
             {storeSettings.socialLinks && storeSettings.socialLinks.length > 0 && (
               <div className="pt-2">
-                <p className="text-[11px] font-bold text-amber-300 mb-2">تابعنا على السوشيال ميديا:</p>
+                <p className="text-[11px] font-bold text-[#D4AF37] mb-2">تابعنا على السوشيال ميديا:</p>
                 <div className="flex flex-wrap items-center gap-2">
                   {storeSettings.socialLinks.map((item) => (
                     <a
@@ -125,7 +125,7 @@ export default function Footer() {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-lg bg-[#07111e] border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white flex items-center justify-center transition-all hover:scale-105"
+                      className="w-8 h-8 rounded-lg bg-[#091F3D] border border-[#D4AF37]/40 hover:border-[#D4AF37] text-[#D4AF37] hover:text-white flex items-center justify-center transition-all hover:scale-105"
                       title={getPlatformName(item.platform)}
                     >
                       {renderSocialIcon(item.platform)}
@@ -139,14 +139,14 @@ export default function Footer() {
           {/* Col 2: Customer Service */}
           <div className="space-y-2">
             <h4 className="text-sm font-bold text-white">خدمة العملاء</h4>
-            <ul className="space-y-1.5 text-slate-400">
+            <ul className="space-y-1.5 text-slate-300">
               <li>
-                <button onClick={() => setCurrentView('tracking')} className="hover:text-amber-300 cursor-pointer">
+                <button onClick={() => setCurrentView('tracking')} className="hover:text-[#D4AF37] cursor-pointer">
                   تتبع مسار شحنتك
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentView('store')} className="hover:text-amber-300 cursor-pointer">
+                <button onClick={() => setCurrentView('store')} className="hover:text-[#D4AF37] cursor-pointer">
                   تصفح المنتجات
                 </button>
               </li>
@@ -155,15 +155,15 @@ export default function Footer() {
                   href={getCleanWhatsAppLink(storeSettings.officialWhatsApp)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emerald-400 flex items-center gap-1.5 cursor-pointer text-emerald-400/90 font-bold"
+                  className="hover:text-emerald-400 flex items-center gap-1.5 cursor-pointer text-emerald-400 font-bold"
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
                   <span>تواصل معنا عبر واتساب</span>
                 </a>
               </li>
               {storeSettings.officialWhatsApp && (
-                <li className="text-[11px] text-slate-400 font-mono">
-                  رقم خدمة العملاء: <span className="text-amber-300">{storeSettings.officialWhatsApp}</span>
+                <li className="text-[11px] text-slate-300 font-mono">
+                  رقم خدمة العملاء: <span className="text-[#D4AF37] font-bold">{storeSettings.officialWhatsApp}</span>
                 </li>
               )}
             </ul>
@@ -172,36 +172,36 @@ export default function Footer() {
           {/* Col 3: Guarantees */}
           <div className="space-y-2">
             <h4 className="text-sm font-bold text-white">الضمان والتوصيل</h4>
-            <ul className="space-y-1.5 text-slate-400">
+            <ul className="space-y-1.5 text-slate-300">
               <li className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>معاينة الشحنة قبل الاستلام والدفع</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>ضمان استبدال واسترجاع 14 يوم</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-amber-400" />
+                <Truck className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>شحن وتوصيل لجميع المحافظات</span>
               </li>
             </ul>
           </div>
 
           {/* Col 4: Quick Contact Card */}
-          <div className="space-y-2 bg-[#06101e] p-4 rounded-2xl border border-amber-500/20">
-            <h4 className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+          <div className="space-y-2 bg-[#091F3D] p-4 rounded-2xl border border-[#D4AF37]/30 shadow-md">
+            <h4 className="text-xs font-bold text-[#D4AF37] flex items-center gap-1.5">
               <MessageCircle className="w-4 h-4 text-emerald-400" />
               <span>محادثة فورية للطلبات</span>
             </h4>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-300">
               فريق خدمة العملاء جاهز للرد على استفساراتك وتأكيد طلباتك يومياً.
             </p>
             <a
               href={getCleanWhatsAppLink(storeSettings.officialWhatsApp)}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+              className="mt-2 w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
             >
               <span>راسلنا على واتساب 💬</span>
             </a>
@@ -210,11 +210,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar with discrete subtle admin entry */}
-        <div className="pt-6 border-t border-amber-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-          <p>© 2026 Blue Lotus. جميع الحقوق محفوظة.</p>
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+          <p>© 2026 Blue Lotus Skincare. جميع الحقوق محفوظة.</p>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-slate-400">
+            <div className="flex items-center gap-1 text-slate-300 font-bold">
               <span>صُنع في مصر</span>
               <span className="text-base">🇪🇬</span>
             </div>
@@ -222,7 +222,7 @@ export default function Footer() {
             {/* Discrete Admin Link (Locked with Password) */}
             <button
               onClick={() => setCurrentView('admin')}
-              className="text-slate-600 hover:text-amber-400/80 transition-colors p-1 flex items-center gap-1 cursor-pointer"
+              className="text-slate-400 hover:text-[#D4AF37] transition-colors p-1 flex items-center gap-1 cursor-pointer"
               title="دخول الإدارة"
               aria-label="دخول الإدارة"
             >

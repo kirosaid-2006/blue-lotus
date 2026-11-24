@@ -54,15 +54,15 @@ export default function OrderTrackingModal() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 text-right">
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-b from-[#0c1a2e] to-[#060e1a] border border-amber-500/30 shadow-2xl space-y-6">
+      <div className="p-6 md:p-8 rounded-3xl bg-white border border-[#0D2B55]/15 shadow-xl space-y-6 text-[#0D2B55]">
         
         <div className="text-center space-y-2">
-          <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
-            نظام التتبع الملكي
+          <span className="px-3 py-1 rounded-full bg-[#E6F0FF] border border-[#0D2B55]/15 text-[#0D2B55] text-xs font-bold">
+            خدمة التتبع المباشر
           </span>
-          <h2 className="text-2xl font-black text-white">تتبع حالة طلبك</h2>
-          <p className="text-xs text-slate-400">
-            أدخل رقم الأوردر (مثال: BL-1021) أو رقم هاتفك لمعرفة مكان شحنتك الآن
+          <h2 className="text-2xl font-black text-[#0D2B55]">تتبع حالة طلبك</h2>
+          <p className="text-xs text-slate-500">
+            أدخل رقم الأوردر (مثال: BL-1021) أو رقم هاتفك لمعرفة حالة شحنتك الآن
           </p>
         </div>
 
@@ -74,11 +74,11 @@ export default function OrderTrackingModal() {
             placeholder="رقم الأوردر أو رقم الموبايل..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl bg-[#050b14] border border-amber-500/30 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:outline-none text-right font-mono"
+            className="flex-1 px-4 py-3 rounded-xl bg-[#F8F5EE] border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-sm focus:border-[#D4AF37] focus:outline-none text-right font-mono"
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-sm hover:brightness-110 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-[#0D2B55] hover:bg-[#091F3D] text-white hover:text-[#D4AF37] font-black text-sm transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
           >
             <Search className="w-4 h-4" />
             <span>بحث</span>
@@ -89,29 +89,29 @@ export default function OrderTrackingModal() {
         {hasSearched && (
           <div>
             {foundOrder ? (
-              <div className="mt-8 p-6 rounded-2xl bg-[#091526] border border-amber-500/25 space-y-6">
+              <div className="mt-8 p-6 rounded-2xl bg-[#F8F5EE] border border-[#0D2B55]/15 space-y-6">
                 
                 {/* Order Top Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-amber-500/20 text-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#0D2B55]/10 text-xs">
                   <div>
-                    <span className="text-slate-400">رقم الطلب:</span>
-                    <span className="font-mono text-base font-black text-amber-300 mr-2">
+                    <span className="text-slate-500">رقم الطلب:</span>
+                    <span className="font-mono text-base font-black text-[#0D2B55] mr-2">
                       #{foundOrder.orderNumber}
                     </span>
                   </div>
-                  <div className="text-slate-300">
+                  <div className="text-slate-600">
                     <span>العميل: </span>
-                    <span className="font-bold text-white">{foundOrder.customerName}</span>
+                    <span className="font-bold text-[#0D2B55]">{foundOrder.customerName}</span>
                   </div>
-                  <div className="text-slate-300">
+                  <div className="text-slate-600">
                     <span>المحافظة: </span>
-                    <span className="font-bold text-amber-300">{foundOrder.governorate}</span>
+                    <span className="font-bold text-[#0D2B55]">{foundOrder.governorate}</span>
                   </div>
                 </div>
 
                 {/* Tracking Progress Steps */}
                 {foundOrder.status === 'cancelled' || foundOrder.status === 'returned' ? (
-                  <div className="p-4 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs text-center font-bold">
+                  <div className="p-4 rounded-xl bg-red-100 border border-red-300 text-red-700 text-xs text-center font-bold">
                     تم إلغاء هذا الطلب أو إرجاعه. لمزيد من التفاصيل يرجى التواصل مع خدمة العملاء.
                   </div>
                 ) : (
@@ -128,15 +128,15 @@ export default function OrderTrackingModal() {
                             <div
                               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                                 isDone
-                                  ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-[0_0_15px_rgba(212,175,55,0.4)]'
-                                  : 'bg-slate-800 text-slate-500 border border-slate-700'
-                              } ${isCurrent ? 'ring-4 ring-amber-400/30 animate-pulse' : ''}`}
+                                  ? 'bg-[#0D2B55] text-white shadow-md'
+                                  : 'bg-white text-slate-400 border border-slate-200'
+                              } ${isCurrent ? 'ring-4 ring-[#D4AF37]/50' : ''}`}
                             >
-                              <Icon className="w-5 h-5" />
+                              <Icon className="w-5 h-5 text-current" />
                             </div>
                             <span
                               className={`text-xs font-bold ${
-                                isDone ? 'text-amber-300' : 'text-slate-500'
+                                isDone ? 'text-[#0D2B55]' : 'text-slate-400'
                               }`}
                             >
                               {st.label}
@@ -149,16 +149,16 @@ export default function OrderTrackingModal() {
                 )}
 
                 {/* Order Details Brief */}
-                <div className="p-4 rounded-xl bg-[#060e1a] border border-amber-500/15 text-xs space-y-2">
-                  <p className="text-slate-400 font-bold mb-2">محتويات الشحنة:</p>
+                <div className="p-4 rounded-xl bg-white border border-[#0D2B55]/10 text-xs space-y-2 shadow-sm">
+                  <p className="text-slate-500 font-bold mb-2">محتويات الشحنة:</p>
                   {foundOrder.items.map((it, i) => (
-                    <div key={i} className="flex justify-between text-slate-200">
+                    <div key={i} className="flex justify-between text-[#0D2B55]">
                       <span>• {it.productName} (× {it.quantity})</span>
-                      <span className="font-mono text-amber-300">{it.price * it.quantity} ج.م</span>
+                      <span className="font-mono font-bold">{it.price * it.quantity} ج.م</span>
                     </div>
                   ))}
 
-                  <div className="pt-2 border-t border-amber-500/15 flex justify-between font-black text-amber-400 text-sm">
+                  <div className="pt-2 border-t border-slate-100 flex justify-between font-black text-[#0D2B55] text-sm">
                     <span>المبلغ المطلوب عند الاستلام:</span>
                     <span>{foundOrder.total} ج.م</span>
                   </div>
@@ -166,10 +166,10 @@ export default function OrderTrackingModal() {
 
               </div>
             ) : (
-              <div className="text-center py-8 p-4 rounded-2xl bg-red-950/20 border border-red-500/30 text-xs">
-                <AlertCircle className="w-8 h-8 mx-auto text-red-400 mb-2" />
-                <p className="text-red-300 font-bold">لم نتمكن من العثور على أوردر بهذا الرقم أو الهاتف</p>
-                <p className="text-slate-400 mt-1">تأكد من كتابة الرقم بدقة مثل: BL-1021 أو رقم الموبايل 010xxxxxxxx</p>
+              <div className="text-center py-8 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs">
+                <AlertCircle className="w-8 h-8 mx-auto text-red-500 mb-2" />
+                <p className="text-red-700 font-bold">لم نتمكن من العثور على أوردر بهذا الرقم أو الهاتف</p>
+                <p className="text-slate-500 mt-1">تأكد من كتابة الرقم بدقة مثل: BL-1021 أو رقم الموبايل 010xxxxxxxx</p>
               </div>
             )}
           </div>
@@ -178,9 +178,9 @@ export default function OrderTrackingModal() {
         <div className="text-center pt-4">
           <button
             onClick={() => setCurrentView('store')}
-            className="text-xs text-amber-400 hover:text-amber-300 font-bold underline"
+            className="text-xs text-[#0D2B55] hover:text-[#D4AF37] font-bold underline cursor-pointer"
           >
-            العودة للمتجر الملكي
+            العودة للمتجر
           </button>
         </div>
 

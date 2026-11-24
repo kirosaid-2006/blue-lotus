@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Product } from '../types';
 import { useStore } from '../context/StoreContext';
 import { Star, ShoppingBag, Zap, ShieldAlert, Sparkles, Check } from 'lucide-react';
@@ -32,10 +31,10 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative rounded-2xl bg-gradient-to-b from-[#0a182b] to-[#060e1a] border border-amber-500/25 hover:border-amber-400/80 p-4 transition-all duration-300 hover:shadow-[0_10px_35px_rgba(212,175,55,0.2)] hover:-translate-y-1.5 flex flex-col justify-between">
+    <div className="group relative rounded-2xl bg-white border border-[#0D2B55]/10 hover:border-[#D4AF37]/60 p-4 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between">
       
-      {/* Top badges */}
-      <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4 bg-slate-900">
+      {/* Product Image */}
+      <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4 bg-[#F8F5EE]">
         <img
           src={product.image}
           alt={product.name}
@@ -48,30 +47,30 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Floating Badges */}
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10">
           {discountPercent > 0 && !isOutOfStock && (
-            <span className="px-2.5 py-1 rounded-full bg-gradient-to-r from-red-600 to-amber-600 text-white text-xs font-black shadow-md flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
+            <span className="px-2.5 py-1 rounded-full bg-[#0D2B55] text-[#D4AF37] text-xs font-black shadow-md flex items-center gap-1 border border-[#D4AF37]/30">
+              <Sparkles className="w-3 h-3 text-[#D4AF37]" />
               خصم {discountPercent}%
             </span>
           )}
 
           {isOutOfStock ? (
-            <span className="px-3 py-1 rounded-full bg-red-950/90 border border-red-500/50 text-red-300 text-xs font-bold shadow-lg flex items-center gap-1">
+            <span className="px-3 py-1 rounded-full bg-red-100 border border-red-300 text-red-700 text-xs font-bold shadow-sm flex items-center gap-1">
               <ShieldAlert className="w-3.5 h-3.5" />
               نفد من المخزون
             </span>
           ) : isLowStock ? (
-            <span className="px-2.5 py-1 rounded-full bg-amber-500/90 text-slate-950 text-xs font-black shadow-lg animate-pulse">
-              متبقي {product.stock} قطع فقط!
+            <span className="px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-black shadow-sm animate-pulse">
+              متبقي {product.stock} فقط!
             </span>
           ) : null}
         </div>
 
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4">
-            <div className="bg-[#050b14]/90 border border-red-500/40 rounded-xl px-4 py-2 text-center">
-              <p className="text-red-400 font-bold text-sm">مغلق مؤقتاً</p>
-              <p className="text-slate-400 text-xs">سيتم توفيره قريباً</p>
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] flex items-center justify-center p-4">
+            <div className="bg-white/95 border border-red-300 shadow-md rounded-xl px-4 py-2 text-center">
+              <p className="text-red-600 font-bold text-sm">مغلق مؤقتاً</p>
+              <p className="text-slate-500 text-xs">سيتم توفيره قريباً</p>
             </div>
           </div>
         )}
@@ -81,49 +80,49 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="space-y-2.5 flex-1 flex flex-col justify-between">
         <div>
           {/* Category & Rating */}
-          <div className="flex items-center justify-between text-xs text-amber-300/80">
-            <span className="font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold px-2 py-0.5 rounded-md bg-[#E6F0FF] text-[#0D2B55] border border-[#0D2B55]/10">
               {product.category}
             </span>
-            <div className="flex items-center gap-1 text-amber-400">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span className="font-bold text-slate-200">{product.rating}</span>
-              <span className="text-slate-500">({product.reviewsCount})</span>
+            <div className="flex items-center gap-1 text-[#D4AF37]">
+              <Star className="w-3.5 h-3.5 fill-[#D4AF37]" />
+              <span className="font-bold text-[#0D2B55]">{product.rating}</span>
+              <span className="text-slate-400">({product.reviewsCount})</span>
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition-colors mt-2">
+          <h3 className="text-base sm:text-lg font-black text-[#0D2B55] group-hover:text-[#0D2B55]/80 transition-colors mt-2">
             {product.name}
           </h3>
-          <p className="text-xs text-slate-400 font-serif tracking-wider">
+          <p className="text-xs text-slate-500 font-medium tracking-wide">
             {product.nameEn}
           </p>
 
           {/* Short Description */}
-          <p className="text-xs text-slate-300/80 line-clamp-2 mt-2 leading-relaxed">
+          <p className="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">
             {product.description}
           </p>
         </div>
 
         {/* Price & Stock info */}
-        <div className="pt-3 border-t border-amber-500/15">
+        <div className="pt-3 border-t border-slate-100">
           <div className="flex items-baseline justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black bg-gradient-to-r from-amber-300 to-yellow-500 bg-clip-text text-transparent">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-[#0D2B55]">
                 {product.price}
               </span>
-              <span className="text-xs font-bold text-amber-200/70">ج.م</span>
+              <span className="text-xs font-bold text-slate-500">ج.م</span>
               {product.originalPrice && (
-                <span className="text-xs text-slate-500 line-through">
+                <span className="text-xs text-slate-400 line-through">
                   {product.originalPrice} ج.م
                 </span>
               )}
             </div>
             
             {!isOutOfStock && (
-              <span className="text-[11px] font-semibold text-emerald-400">
-                متاح {product.stock} بالمخزن
+              <span className="text-[11px] font-bold text-emerald-800 bg-[#A7C4A0]/25 border border-[#A7C4A0]/40 px-2 py-0.5 rounded-full">
+                متاح بالمخزن
               </span>
             )}
           </div>
@@ -135,12 +134,12 @@ export default function ProductCard({ product }: { product: Product }) {
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               isOutOfStock
-                ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
                 : isAddedRecently
                 ? 'bg-emerald-600 text-white font-black'
-                : 'bg-[#0f2542] hover:bg-[#163864] text-amber-200 border border-amber-500/40 hover:border-amber-400'
+                : 'bg-[#E6F0FF] hover:bg-[#D4AF37]/20 text-[#0D2B55] border border-[#0D2B55]/15 hover:border-[#D4AF37]'
             }`}
           >
             {isAddedRecently ? (
@@ -150,7 +149,7 @@ export default function ProductCard({ product }: { product: Product }) {
               </>
             ) : (
               <>
-                <ShoppingBag className="w-3.5 h-3.5 text-amber-400" />
+                <ShoppingBag className="w-3.5 h-3.5 text-[#0D2B55]" />
                 <span>أضف للسلة</span>
               </>
             )}
@@ -160,13 +159,13 @@ export default function ProductCard({ product }: { product: Product }) {
           <button
             onClick={handleQuickOrder}
             disabled={isOutOfStock}
-            className={`py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-md ${
+            className={`py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer ${
               isOutOfStock
-                ? 'bg-slate-800/40 text-slate-600 cursor-not-allowed border border-slate-800'
-                : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 text-[#050b14] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95'
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                : 'bg-[#0D2B55] hover:bg-[#091F3D] text-white hover:text-[#D4AF37] border border-[#0D2B55] shadow-md hover:shadow-lg active:scale-95'
             }`}
           >
-            <Zap className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+            <Zap className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
             <span>طلب فوري</span>
           </button>
         </div>

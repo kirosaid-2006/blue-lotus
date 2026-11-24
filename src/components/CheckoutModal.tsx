@@ -109,7 +109,7 @@ export default function CheckoutModal() {
           particleCount: 120,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#d4af37', '#1e3a8a', '#f3e5ab', '#3b82f6'],
+          colors: ['#0D2B55', '#D4AF37', '#A7C4A0', '#E6F0FF'],
         });
       }
     } catch (err) {
@@ -133,20 +133,20 @@ export default function CheckoutModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#0c1a2e] to-[#060e1a] border border-amber-500/40 rounded-3xl shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0D2B55]/50 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="relative w-full max-w-2xl bg-[#F8F5EE] border border-[#0D2B55]/15 rounded-3xl shadow-2xl overflow-hidden my-8 text-[#0D2B55]">
         
         {/* Header */}
-        <div className="p-5 border-b border-amber-500/20 bg-[#091526] flex items-center justify-between">
+        <div className="p-5 border-b border-[#0D2B55]/10 bg-white flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-amber-400" />
-            <h3 className="text-lg font-black text-white">
-              {completedOrder ? 'تم تأكيد طلبك الملكي بنجاح!' : 'تأكيد بيانات الشحن والتوصيل'}
+            <ShieldCheck className="w-5 h-5 text-[#0D2B55]" />
+            <h3 className="text-lg font-black text-[#0D2B55]">
+              {completedOrder ? 'تم تأكيد طلبك بنجاح!' : 'تأكيد بيانات الشحن والتوصيل'}
             </h3>
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[#0D2B55] hover:bg-slate-100 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -156,43 +156,41 @@ export default function CheckoutModal() {
         {completedOrder ? (
           /* Success Screen */
           <div className="p-6 md:p-8 text-center space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1 flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.5)]">
-              <div className="w-full h-full rounded-full bg-[#050b14] flex items-center justify-center text-amber-400">
-                <CheckCircle2 className="w-12 h-12" />
-              </div>
+            <div className="w-20 h-20 mx-auto rounded-full bg-[#E6F0FF] p-1 flex items-center justify-center border border-[#0D2B55]/20 shadow-sm">
+              <CheckCircle2 className="w-12 h-12 text-[#0D2B55]" />
             </div>
 
             <div>
-              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-sm font-bold">
+              <span className="px-3 py-1 rounded-full bg-[#E6F0FF] border border-[#0D2B55]/20 text-[#0D2B55] font-mono text-sm font-bold">
                 رقم الأوردر: #{completedOrder.orderNumber}
               </span>
-              <h4 className="text-2xl font-black text-white mt-3">
-                شكراً لاختيارك Blue Lotus يا {completedOrder.customerName}! 🌸
+              <h4 className="text-2xl font-black text-[#0D2B55] mt-3">
+                شكراً لاختيارك Blue Lotus Skincare يا {completedOrder.customerName}! 🌸
               </h4>
-              <p className="text-sm text-slate-300 mt-2 max-w-md mx-auto">
-                تم تسجيل طلبك بنجاح في نظامنا الملكي. سيتواصل معك أحد مسؤولي التأكيد خلال دقائق لتأكيد الموعد وتجهيز الشحنة.
+              <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">
+                تم تسجيل طلبك بنجاح. سيتواصل معك أحد مسؤولي التأكيد خلال دقائق لتأكيد الموعد وتجهيز شحنتك.
               </p>
             </div>
 
             {/* Order Summary Box */}
-            <div className="rounded-2xl bg-[#091526]/80 border border-amber-500/25 p-4 text-right space-y-2 text-xs">
-              <div className="flex justify-between text-slate-300">
+            <div className="rounded-2xl bg-white border border-[#0D2B55]/15 p-4 text-right space-y-2 text-xs shadow-sm">
+              <div className="flex justify-between text-slate-600">
                 <span>المحافظة والعنوان:</span>
-                <span className="font-bold text-white">{completedOrder.governorate} - {completedOrder.address}</span>
+                <span className="font-bold text-[#0D2B55]">{completedOrder.governorate} - {completedOrder.address}</span>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span>رقم الهاتف للتواصل:</span>
-                <span className="font-bold text-white font-mono">{completedOrder.customerPhone}</span>
+                <span className="font-bold text-[#0D2B55] font-mono">{completedOrder.customerPhone}</span>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span>مصاريف الشحن:</span>
-                <span className="font-bold text-emerald-400">
+                <span className="font-bold text-emerald-700">
                   {completedOrder.shippingCost === 0 ? 'مجاني 🎁' : `${completedOrder.shippingCost} ج.م`}
                 </span>
               </div>
-              <div className="flex justify-between text-base font-black text-amber-300 pt-2 border-t border-amber-500/20">
+              <div className="flex justify-between text-base font-black text-[#0D2B55] pt-2 border-t border-slate-100">
                 <span>المبلغ المطلوب عند الاستلام:</span>
-                <span>{completedOrder.total} ج.م</span>
+                <span className="text-xl">{completedOrder.total} ج.م</span>
               </div>
             </div>
 
@@ -202,14 +200,14 @@ export default function CheckoutModal() {
                 href={generateWhatsAppLink(completedOrder)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-sm md:text-base shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-[#0D2B55] hover:bg-[#091F3D] text-white hover:text-[#D4AF37] font-black text-sm md:text-base shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#0D2B55]"
               >
-                <span>تأكيد الأوردر فوراً عبر محادثة واتساب خدمة العملاء 💬</span>
+                <span>تأكيد الأوردر فوراً عبر واتساب خدمة العملاء 💬</span>
               </a>
 
               <button
                 onClick={handleClose}
-                className="w-full py-3 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all"
+                className="w-full py-3 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] hover:bg-[#E6F0FF] text-xs font-bold transition-all cursor-pointer"
               >
                 العودة للتسوق في المتجر
               </button>
@@ -219,8 +217,8 @@ export default function CheckoutModal() {
           /* Checkout Form */
           <form onSubmit={handleSubmitOrder} className="p-6 md:p-8 space-y-5">
             {formError && (
-              <div className="p-3.5 rounded-xl bg-red-950/80 border border-red-500/50 text-red-300 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
                 <span>{formError}</span>
               </div>
             )}
@@ -228,22 +226,22 @@ export default function CheckoutModal() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Customer Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1.5 text-right">
+                <label className="block text-xs font-bold text-[#0D2B55] mb-1.5 text-right">
                   الاسم بالكامل *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="مثال: أحمد عبد الله"
+                  placeholder="مثال: ياسمين أحمد"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#07111e] border border-amber-500/30 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-sm focus:border-[#D4AF37] focus:outline-none shadow-sm"
                 />
               </div>
 
               {/* Customer Phone */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1.5 text-right">
+                <label className="block text-xs font-bold text-[#0D2B55] mb-1.5 text-right">
                   رقم الموبايل (مصر) *
                 </label>
                 <div className="relative">
@@ -253,9 +251,9 @@ export default function CheckoutModal() {
                     placeholder="010xxxxxxxx أو 011 / 012 / 015"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#07111e] border border-amber-500/30 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:outline-none text-right font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-sm focus:border-[#D4AF37] focus:outline-none text-right font-mono shadow-sm"
                   />
-                  <Phone className="w-4 h-4 text-amber-400/60 absolute left-3 top-3" />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
               </div>
             </div>
@@ -263,16 +261,16 @@ export default function CheckoutModal() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Governorate Selection */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1.5 text-right">
+                <label className="block text-xs font-bold text-[#0D2B55] mb-1.5 text-right">
                   المحافظة *
                 </label>
                 <select
                   value={selectedGovernorate}
                   onChange={(e) => setSelectedGovernorate(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#07111e] border border-amber-500/30 text-white text-sm focus:border-amber-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] text-sm focus:border-[#D4AF37] focus:outline-none shadow-sm font-medium"
                 >
                   {governorates.map((gov) => (
-                    <option key={gov.id} value={gov.nameAr} className="bg-slate-900 text-white">
+                    <option key={gov.id} value={gov.nameAr}>
                       {gov.nameAr} ({gov.cost} ج.م شحن)
                     </option>
                   ))}
@@ -281,7 +279,7 @@ export default function CheckoutModal() {
 
               {/* Address */}
               <div>
-                <label className="block text-xs font-bold text-slate-200 mb-1.5 text-right">
+                <label className="block text-xs font-bold text-[#0D2B55] mb-1.5 text-right">
                   العنوان بالتفصيل *
                 </label>
                 <input
@@ -290,14 +288,14 @@ export default function CheckoutModal() {
                   placeholder="المنطقة - اسم الشارع - رقم العمارة والشقة"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#07111e] border border-amber-500/30 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-sm focus:border-[#D4AF37] focus:outline-none shadow-sm"
                 />
               </div>
             </div>
 
             {/* Notes */}
             <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5 text-right">
+              <label className="block text-xs font-bold text-[#0D2B55] mb-1.5 text-right">
                 ملاحظات للتوصيل (اختياري)
               </label>
               <input
@@ -305,15 +303,15 @@ export default function CheckoutModal() {
                 placeholder="مثال: الاتصال قبل الوصول بنصف ساعة أو مواعيد مفضلة"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#07111e] border border-amber-500/30 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-sm focus:border-[#D4AF37] focus:outline-none shadow-sm"
               />
             </div>
 
             {/* Promo Code Box */}
-            <div className="p-3.5 rounded-xl bg-[#091526]/80 border border-amber-500/25 space-y-2">
-              <label className="block text-xs font-bold text-amber-300 text-right flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-white border border-[#0D2B55]/15 space-y-2 shadow-sm">
+              <label className="block text-xs font-bold text-[#0D2B55] text-right flex items-center justify-between">
                 <span>هل لديك برومو كود أو كود مسوق؟</span>
-                <Tag className="w-3.5 h-3.5 text-amber-400" />
+                <Tag className="w-3.5 h-3.5 text-[#D4AF37]" />
               </label>
               
               <div className="flex gap-2">
@@ -323,13 +321,13 @@ export default function CheckoutModal() {
                   value={promoCodeInput}
                   onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                   disabled={!!appliedPromo}
-                  className="flex-1 px-3 py-2 rounded-lg bg-[#050b14] border border-amber-500/30 text-white placeholder-slate-500 text-xs uppercase font-mono tracking-wider focus:border-amber-400 focus:outline-none"
+                  className="flex-1 px-3 py-2 rounded-lg bg-[#F8F5EE] border border-[#0D2B55]/20 text-[#0D2B55] placeholder-slate-400 text-xs uppercase font-mono tracking-wider focus:border-[#D4AF37] focus:outline-none"
                 />
                 {appliedPromo ? (
                   <button
                     type="button"
                     onClick={handleRemovePromo}
-                    className="px-3 py-2 rounded-lg bg-red-950/80 text-red-300 border border-red-500/40 text-xs font-bold hover:bg-red-900"
+                    className="px-3 py-2 rounded-lg bg-red-100 text-red-700 border border-red-300 text-xs font-bold hover:bg-red-200 cursor-pointer"
                   >
                     إلغاء
                   </button>
@@ -337,7 +335,7 @@ export default function CheckoutModal() {
                   <button
                     type="button"
                     onClick={handleApplyPromo}
-                    className="px-4 py-2 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold hover:bg-amber-500/30"
+                    className="px-4 py-2 rounded-lg bg-[#E6F0FF] hover:bg-[#D4AF37]/20 text-[#0D2B55] border border-[#0D2B55]/20 text-xs font-bold transition-all cursor-pointer"
                   >
                     تطبيق
                   </button>
@@ -345,43 +343,43 @@ export default function CheckoutModal() {
               </div>
 
               {promoMessage && (
-                <p className={`text-xs ${promoMessage.isError ? 'text-red-400' : 'text-emerald-400'} font-semibold`}>
+                <p className={`text-xs ${promoMessage.isError ? 'text-red-600' : 'text-emerald-700'} font-semibold`}>
                   {promoMessage.text}
                 </p>
               )}
             </div>
 
             {/* Calculations Breakdown */}
-            <div className="rounded-xl bg-[#07111e] p-4 border border-amber-500/20 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-300">
+            <div className="rounded-xl bg-white p-4 border border-[#0D2B55]/15 space-y-2 text-xs shadow-sm">
+              <div className="flex justify-between text-slate-600">
                 <span>المجموع الفرعي ({cart.reduce((s, i) => s + i.quantity, 0)} قطع):</span>
-                <span>{subtotal} ج.م</span>
+                <span className="font-bold text-[#0D2B55]">{subtotal} ج.م</span>
               </div>
 
               {promoDiscount > 0 && (
-                <div className="flex justify-between text-emerald-400 font-bold">
+                <div className="flex justify-between text-emerald-700 font-bold">
                   <span>خصم كود ({appliedPromo}):</span>
                   <span>- {promoDiscount} ج.م</span>
                 </div>
               )}
 
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span className="flex items-center gap-1">
                   <span>مصاريف الشحن لـ ({selectedGovernorate}):</span>
                   {isFreeShipping && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
                       عرض شحن مجاني
                     </span>
                   )}
                 </span>
-                <span className={shippingCost === 0 ? 'text-emerald-400 font-bold' : ''}>
+                <span className={shippingCost === 0 ? 'text-emerald-700 font-bold' : 'font-bold text-[#0D2B55]'}>
                   {shippingCost === 0 ? '0 ج.م' : `${shippingCost} ج.م`}
                 </span>
               </div>
 
-              <div className="flex justify-between text-base font-black text-amber-300 pt-2 border-t border-amber-500/20">
+              <div className="flex justify-between text-base font-black text-[#0D2B55] pt-2 border-t border-slate-100">
                 <span>الإجمالي النهائي للدفع عند الاستلام:</span>
-                <span className="text-xl">{total} ج.م</span>
+                <span className="text-xl font-black">{total} ج.م</span>
               </div>
             </div>
 
@@ -389,14 +387,14 @@ export default function CheckoutModal() {
             <button
               type="submit"
               disabled={isSubmitting || cart.length === 0}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 text-[#050b14] font-black text-base shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:shadow-[0_0_35px_rgba(212,175,55,0.6)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="w-full py-4 rounded-xl bg-[#0D2B55] hover:bg-[#091F3D] text-white hover:text-[#D4AF37] font-black text-base shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all border border-[#0D2B55]"
             >
               <span>{isSubmitting ? 'جاري تسجيل الطلب...' : 'تأكيد طلب الأوردر الآن (الدفع عند الاستلام)'}</span>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
             </button>
 
-            <div className="flex items-center justify-center gap-2 text-slate-400 text-xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center justify-center gap-2 text-slate-500 text-xs">
+              <ShieldCheck className="w-4 h-4 text-emerald-700" />
               <span>معاينة مجانية للمنتج قبل الدفع مع المندوب وضمان استبدال واسترجاع</span>
             </div>
           </form>

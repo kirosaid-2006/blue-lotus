@@ -2,8 +2,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #040810;
-  --foreground: #f8fafc;
+  --background: #F8F5EE;
+  --foreground: #0D2B55;
+  --royal-navy: #0D2B55;
+  --champagne-gold: #D4AF37;
+  --warm-cream: #F8F5EE;
+  --powder-blue: #E6F0FF;
+  --sage-green: #A7C4A0;
 }
 
 html {
@@ -12,37 +17,28 @@ html {
 }
 
 body {
-  background: #040810;
-  color: #f8fafc;
+  background-color: #F8F5EE;
+  color: #0D2B55;
   font-family: 'Alexandria', sans-serif;
   overflow-x: hidden;
 }
 
-/* Luxury Royal Gold Gradient Text */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #b45309 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Luxury Gold Accent Text */
+.gold-accent-text {
+  color: #D4AF37;
 }
 
-/* Custom Egyptian Gold Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #050b14;
+  background: #F8F5EE;
 }
 ::-webkit-scrollbar-thumb {
-  background: #b45309;
+  background: #0D2B55;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
-}
-
-/* Glassmorphism card */
-.glass-gold {
-  background: rgba(10, 24, 43, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: #D4AF37;
 }

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Blue Lotus | براند اللوتس الأزرق الملكي',
-  description: 'المتجر الملكي لعطور وزيوت اللوتس الأزرق الفرعونية الفاخرة - تسوق أفخم المنتجات مع الدفع عند الاستلام والشحن السريع لجميع محافظات مصر.',
-  keywords: ['عطور فرعونية', 'اللوتس الأزرق', 'زيت نفرتيتي', 'Blue Lotus', 'عطور مصرية فاخرة', 'أفلييت'],
+  title: 'Blue Lotus Skincare | منتجات العناية الفاخرة بالبشرة',
+  description: 'براند العناية الطبيعية بالبشرة واللوتس الأزرق - كريمات ولوشن طبيعية فاخرة لترطيب ونضارة فائقة لكافة أنواع البشرة.',
+  keywords: ['Blue Lotus Skincare', 'كريمات طبيعية', 'لوشن اللوتس الأزرق', 'عناية بالبشرة', 'كريم نهار', 'عناية ملكية'],
   icons: {
     icon: '/logo.jpg',
   },
@@ -21,7 +21,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo.jpg" />
       </head>
       <body
-        className="min-h-full flex flex-col bg-[#040810] text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950"
+        className="min-h-full flex flex-col bg-[#F8F5EE] text-[#0D2B55] antialiased selection:bg-[#D4AF37]/30 selection:text-[#0D2B55]"
         suppressHydrationWarning
       >
         {children}

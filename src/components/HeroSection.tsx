@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { ArrowDown, ShoppingBag } from 'lucide-react';
 
 export default function HeroSection() {
@@ -11,51 +10,31 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative overflow-hidden py-12 md:py-16 bg-gradient-to-b from-[#050b14] via-[#091526] to-[#050b14] border-b border-amber-500/20">
-      {/* Background ambient radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 md:pt-6 md:pb-10">
+      {/* Hero Banner Container */}
+      <div className="relative w-full aspect-[2/1] rounded-2xl md:rounded-3xl overflow-hidden shadow-md border border-[#D4AF37]/30 bg-white">
+        {/* The Hero Skincare Image Graphic */}
+        <img
+          src="/hero.jpg"
+          alt="Blue Lotus Natural Skincare Banner"
+          className="w-full h-full object-cover select-none"
+        />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
-        
-        {/* Brand Emblem */}
-        <div className="inline-block relative">
-          <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full overflow-hidden border-2 border-amber-400 shadow-[0_0_35px_rgba(212,175,55,0.4)]">
-            <Image
-              src="/logo.jpg"
-              alt="Blue Lotus Emblem"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-        </div>
-
-        {/* Main Brand Title */}
-        <div className="space-y-2">
-          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-            متجر{' '}
-            <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(212,175,55,0.3)] font-serif tracking-wide">
-              BLUE LOTUS
-            </span>
-          </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-lg mx-auto font-medium">
-            منتجات راقية ومميزة - تسوق طلبك الآن واستلمه عند باب منزلك مع الدفع عند الاستلام بعد المعاينة
-          </p>
-        </div>
-
-        {/* Action Button */}
-        <div className="pt-2">
+        {/* Action Button Only - Positioned on the Left */}
+        <div 
+          className="absolute left-3 sm:left-6 md:left-10 lg:left-14 bottom-2 sm:bottom-4 md:bottom-6 lg:bottom-8 z-20"
+          dir="ltr"
+        >
           <button
             onClick={scrollToProducts}
-            className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 text-[#050b14] font-black text-sm shadow-[0_0_25px_rgba(212,175,55,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.55)] hover:scale-[1.02] active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+            dir="rtl"
+            className="group px-3 py-1.5 sm:px-5 sm:py-2.5 md:px-7 md:py-3 rounded-full bg-[#0D2B55] hover:bg-[#091F3D] text-white font-bold text-[11px] sm:text-xs md:text-sm tracking-wide shadow-xl hover:shadow-2xl border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
           >
-            <ShoppingBag className="w-4 h-4 text-slate-950" />
-            <span>عرض كافة المنتجات</span>
-            <ArrowDown className="w-4 h-4 text-slate-950" />
+            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37] transition-transform group-hover:scale-110" />
+            <span className="font-black">تسوق منتجاتنا الآن</span>
+            <ArrowDown className="w-3.5 h-3.5 text-[#D4AF37] group-hover:translate-y-0.5 transition-transform" />
           </button>
         </div>
-
       </div>
     </section>
   );
