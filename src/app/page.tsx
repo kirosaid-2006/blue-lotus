@@ -41,28 +41,6 @@ function StoreContent() {
             {/* Hero Banner */}
             <HeroSection />
 
-            {/* Natural Skincare Features Strip */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 mb-6">
-              <div className="bg-[#E6F0FF] rounded-2xl p-4 sm:p-5 border border-[#0D2B55]/10 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#0D2B55]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#A7C4A0]" />
-                  <span>مستخلصات طبيعية 100%</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#0D2B55]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]" />
-                  <span>مناسب لجميع أنواع البشرة</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#0D2B55]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0D2B55]" />
-                  <span>شحن سريع لـ 27 محافظة</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-[#0D2B55]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#A7C4A0]" />
-                  <span>معاينة قبل الدفع عند الاستلام</span>
-                </div>
-              </div>
-            </section>
-
             {/* Products Section */}
             <section id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
               

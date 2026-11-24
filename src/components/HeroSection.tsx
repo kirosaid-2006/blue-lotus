@@ -10,10 +10,10 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 md:pt-6 md:pb-10">
-      {/* Hero Banner Container */}
-      <div className="relative w-full aspect-[2/1] rounded-2xl md:rounded-3xl overflow-hidden shadow-md border border-[#D4AF37]/30 bg-white">
-        {/* The Hero Skincare Image Graphic */}
+    <section className="relative w-full p-0 m-0 overflow-hidden bg-white">
+      {/* Edge-to-Edge Hero Banner Container touching navbar and sides */}
+      <div className="relative w-full aspect-[2/1] overflow-hidden bg-white">
+        {/* Full rectangular hero image touching page edges */}
         <img
           src="/hero.jpg"
           alt="Blue Lotus Natural Skincare Banner"
@@ -22,13 +22,13 @@ export default function HeroSection() {
 
         {/* Action Button Only - Positioned on the Left */}
         <div 
-          className="absolute left-3 sm:left-6 md:left-10 lg:left-14 bottom-2 sm:bottom-4 md:bottom-6 lg:bottom-8 z-20"
+          className="absolute left-3 sm:left-6 md:left-10 lg:left-14 bottom-2.5 sm:bottom-5 md:bottom-7 lg:bottom-9 z-20"
           dir="ltr"
         >
           <button
             onClick={scrollToProducts}
             dir="rtl"
-            className="group px-3 py-1.5 sm:px-5 sm:py-2.5 md:px-7 md:py-3 rounded-full bg-[#0D2B55] hover:bg-[#091F3D] text-white font-bold text-[11px] sm:text-xs md:text-sm tracking-wide shadow-xl hover:shadow-2xl border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
+            className="group px-3 py-1.5 sm:px-5 sm:py-2.5 md:px-7 md:py-3.5 rounded-full bg-[#0D2B55] hover:bg-[#091F3D] text-white font-bold text-[11px] sm:text-xs md:text-sm tracking-wide shadow-xl hover:shadow-2xl border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37] transition-transform group-hover:scale-110" />
             <span className="font-black">تسوق منتجاتنا الآن</span>
