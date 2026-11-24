@@ -13,6 +13,8 @@ export interface Product {
   isFeatured?: boolean;
 }
 
+export type PromoTargetType = 'all' | 'specific_product';
+
 export interface PromoCode {
   id: string;
   code: string;
@@ -20,6 +22,9 @@ export interface PromoCode {
   marketerPhone: string;
   discountType: 'percentage' | 'fixed';
   discountValue: number; // e.g. 15 for 15%, or 100 for 100 EGP
+  targetType: PromoTargetType; // هل الخصم على كل المنتجات أم منتج محدد
+  targetProductId?: string; // ID المنتج المحدد إذا كان targetType === 'specific_product'
+  targetProductName?: string;
   maxUses: number;
   currentUses: number;
   expiryDate: string; // YYYY-MM-DD
@@ -73,4 +78,25 @@ export interface GovernorateShipping {
   nameAr: string;
   nameEn: string;
   cost: number;
+}
+
+export type SocialPlatform =
+  | 'facebook'
+  | 'instagram'
+  | 'tiktok'
+  | 'whatsapp'
+  | 'telegram'
+  | 'youtube'
+  | 'snapchat'
+  | 'x';
+
+export interface SocialLink {
+  id: string;
+  platform: SocialPlatform;
+  url: string;
+}
+
+export interface StoreSettings {
+  officialWhatsApp: string; // رقم الواتساب الرسمي للمتجر
+  socialLinks: SocialLink[]; // لينكات السوشيال ميديا
 }

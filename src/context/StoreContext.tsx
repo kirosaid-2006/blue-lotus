@@ -1,8 +1,24 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Product, PromoCode, Order, OrderStatus, GovernorateShipping } from '../types';
-import { INITIAL_PRODUCTS, INITIAL_PROMO_CODES, INITIAL_ORDERS, INITIAL_GOVERNORATES } from '../data/initialData';
+import {
+  Product,
+  PromoCode,
+  Order,
+  OrderStatus,
+  GovernorateShipping,
+  StoreSettings,
+  SocialLink,
+  SocialPlatform,
+  PromoTargetType,
+} from '../types';
+import {
+  INITIAL_PRODUCTS,
+  INITIAL_PROMO_CODES,
+  INITIAL_ORDERS,
+  INITIAL_GOVERNORATES,
+  INITIAL_SETTINGS,
+} from '../data/initialData';
 
 export interface CartItem {
   product: Product;
@@ -30,6 +46,13 @@ interface StoreContextType {
   currentView: 'store' | 'admin' | 'tracking';
   setCurrentView: (view: 'store' | 'admin' | 'tracking') => void;
   
+  // Store Settings (WhatsApp & Social Links)
+  storeSettings: StoreSettings;
+  updateOfficialWhatsApp: (newNumber: string) => void;
+  addSocialLink: (link: Omit<SocialLink, 'id'>) => void;
+  updateSocialLink: (id: string, updates: Partial<SocialLink>) => void;
+  deleteSocialLink: (id: string) => void;
+
   // Admin Auth
   isAdminLoggedIn: boolean;
   loginAdmin: (password: string) => boolean;
@@ -53,7 +76,7 @@ interface StoreContextType {
   addPromoCode: (code: Omit<PromoCode, 'id' | 'currentUses' | 'createdAt'>) => void;
   updatePromoCode: (id: string, updates: Partial<PromoCode>) => void;
   deletePromoCode: (id: string) => void;
-  validatePromoCode: (codeStr: string, subtotal: number) => ValidationResult;
+  validatePromoCode: (codeStr: string, subtotal: number, items?: CartItem[]) => ValidationResult;
 
   // Orders CRUD
   createOrder: (orderData: {
@@ -84,6 +107,7 @@ const STORAGE_KEYS = {
   ORDERS: 'blue_lotus_orders_v4',
   GOVERNORATES: 'blue_lotus_governorates_v4',
   CART: 'blue_lotus_cart_v4',
+  SETTINGS: 'blue_lotus_settings_v4',
   ADMIN_PASSWORD: 'blue_lotus_admin_pwd_v4',
   ADMIN_LOGGED_IN: 'blue_lotus_admin_auth_v4',
 };
@@ -95,6 +119,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [governorates, setGovernorates] = useState<GovernorateShipping[]>(INITIAL_GOVERNORATES);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(1200);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(INITIAL_SETTINGS);
   
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -126,6 +151,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const storedCart = localStorage.getItem(STORAGE_KEYS.CART);
       if (storedCart) setCart(JSON.parse(storedCart));
 
+      const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      if (storedSettings) {
+        setStoreSettings(JSON.parse(storedSettings));
+      } else {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(INITIAL_SETTINGS));
+      }
+
       const storedPwd = localStorage.getItem(STORAGE_KEYS.ADMIN_PASSWORD);
       if (storedPwd) {
         setAdminPassword(storedPwd);
@@ -153,6 +185,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setPromoCodes(JSON.parse(e.newValue));
         } else if (e.key === STORAGE_KEYS.GOVERNORATES) {
           setGovernorates(JSON.parse(e.newValue));
+        } else if (e.key === STORAGE_KEYS.SETTINGS) {
+          setStoreSettings(JSON.parse(e.newValue));
         } else if (e.key === STORAGE_KEYS.ADMIN_PASSWORD) {
           setAdminPassword(e.newValue);
         }
@@ -171,6 +205,63 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
     } catch (e) {}
   }, [cart]);
+
+  // Store Settings (WhatsApp & Social Links)
+  const updateOfficialWhatsApp = (newNumber: string) => {
+    const cleanNumber = newNumber.trim();
+    setStoreSettings((prev) => {
+      const updated = { ...prev, officialWhatsApp: cleanNumber };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const addSocialLink = (linkData: Omit<SocialLink, 'id'>) => {
+    const newLink: SocialLink = {
+      ...linkData,
+      id: 'soc-' + Date.now(),
+    };
+    setStoreSettings((prev) => {
+      const updated = {
+        ...prev,
+        socialLinks: [...prev.socialLinks, newLink],
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const updateSocialLink = (id: string, updates: Partial<SocialLink>) => {
+    setStoreSettings((prev) => {
+      const updated = {
+        ...prev,
+        socialLinks: prev.socialLinks.map((item) =>
+          item.id === id ? { ...item, ...updates } : item
+        ),
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const deleteSocialLink = (id: string) => {
+    setStoreSettings((prev) => {
+      const updated = {
+        ...prev,
+        socialLinks: prev.socialLinks.filter((item) => item.id !== id),
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
 
   // Admin Auth functions
   const loginAdmin = (enteredPassword: string): boolean => {
@@ -334,8 +425,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
-  // Validate Promo Code
-  const validatePromoCode = (codeStr: string, subtotal: number): ValidationResult => {
+  // Validate Promo Code (Handles both "All Products" and "Specific Product")
+  const validatePromoCode = (
+    codeStr: string,
+    subtotal: number,
+    items?: CartItem[]
+  ): ValidationResult => {
     if (!codeStr || !codeStr.trim()) {
       return { valid: false, discountAmount: 0 };
     }
@@ -359,6 +454,38 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { valid: false, discountAmount: 0, message: 'انتهت صلاحية هذا الكود' };
     }
 
+    const cartItems = items || cart;
+
+    // Specific Product Discount Logic
+    if (found.targetType === 'specific_product' && found.targetProductId) {
+      const targetItem = cartItems.find((item) => item.product.id === found.targetProductId);
+
+      if (!targetItem) {
+        return {
+          valid: false,
+          discountAmount: 0,
+          message: `هذا الكود خاص بمنتج "${found.targetProductName || 'محدد'}" وهو غير موجود في سلتك`,
+        };
+      }
+
+      const itemTotal = targetItem.product.price * targetItem.quantity;
+      let discountAmount = 0;
+
+      if (found.discountType === 'percentage') {
+        discountAmount = Math.round((itemTotal * found.discountValue) / 100);
+      } else {
+        discountAmount = Math.min(found.discountValue, itemTotal);
+      }
+
+      return {
+        valid: true,
+        discountAmount,
+        promoCode: found,
+        message: `تم تطبيق خصم ${discountAmount} ج.م على منتج (${found.targetProductName || targetItem.product.name})`,
+      };
+    }
+
+    // All Products Discount Logic
     let discountAmount = 0;
     if (found.discountType === 'percentage') {
       discountAmount = Math.round((subtotal * found.discountValue) / 100);
@@ -393,7 +520,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let validPromoCode: PromoCode | undefined;
 
     if (orderData.promoCodeUsed) {
-      const val = validatePromoCode(orderData.promoCodeUsed, subtotal);
+      const val = validatePromoCode(orderData.promoCodeUsed, subtotal, cart);
       if (val.valid && val.promoCode) {
         discount = val.discountAmount;
         validPromoCode = val.promoCode;
@@ -559,6 +686,11 @@ ${order.notes ? `📝 ملاحظات: ${order.notes}\n` : ''}-------------------
         setIsCheckoutOpen,
         currentView,
         setCurrentView,
+        storeSettings,
+        updateOfficialWhatsApp,
+        addSocialLink,
+        updateSocialLink,
+        deleteSocialLink,
         isAdminLoggedIn,
         loginAdmin,
         logoutAdmin,

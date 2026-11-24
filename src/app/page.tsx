@@ -9,6 +9,7 @@ import CartDrawer from '../components/CartDrawer';
 import CheckoutModal from '../components/CheckoutModal';
 import AdminDashboard from '../components/AdminDashboard';
 import OrderTrackingModal from '../components/OrderTrackingModal';
+import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import Footer from '../components/Footer';
 import { Search } from 'lucide-react';
 
@@ -121,6 +122,7 @@ function StoreContent() {
       {/* Floating Modals & Drawers */}
       <CartDrawer />
       <CheckoutModal />
+      <FloatingWhatsApp />
 
       <Footer />
     </div>

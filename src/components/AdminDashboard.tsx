@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useStore } from '../context/StoreContext';
-import { Product, PromoCode, Order, OrderStatus } from '../types';
+import { Product, PromoCode, Order, OrderStatus, SocialPlatform, PromoTargetType } from '../types';
 import {
   TrendingUp,
   Package,
@@ -29,6 +29,11 @@ import {
   EyeOff,
   AlertCircle,
   Upload,
+  Share2,
+  Globe,
+  MessageCircle,
+  ExternalLink,
+  Check,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -55,6 +60,10 @@ export default function AdminDashboard() {
     changeAdminPassword,
     clearAllOrders,
     setCurrentView,
+    storeSettings,
+    updateOfficialWhatsApp,
+    addSocialLink,
+    deleteSocialLink,
   } = useStore();
 
   // Login form state
@@ -67,7 +76,7 @@ export default function AdminDashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [pwdChangedSuccess, setPwdChangedSuccess] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'analytics' | 'products' | 'promos' | 'shipping'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'analytics' | 'products' | 'promos' | 'shipping' | 'settings'>('orders');
 
   // Orders Filter & Search
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
@@ -96,10 +105,61 @@ export default function AdminDashboard() {
   const [newCodePhone, setNewCodePhone] = useState('');
   const [newCodeType, setNewCodeType] = useState<'percentage' | 'fixed'>('percentage');
   const [newCodeValue, setNewCodeValue] = useState<number>(10);
+  const [newCodeTargetType, setNewCodeTargetType] = useState<PromoTargetType>('all');
+  const [newCodeTargetProdId, setNewCodeTargetProdId] = useState<string>('');
   const [newCodeMaxUses, setNewCodeMaxUses] = useState<number>(50);
   const [newCodeExpiry, setNewCodeExpiry] = useState<string>('2027-12-31');
   const [newCodeCommType, setNewCodeCommType] = useState<'percentage' | 'fixed'>('fixed');
   const [newCodeCommValue, setNewCodeCommValue] = useState<number>(40);
+
+  // Store Settings State (WhatsApp & Social Links)
+  const [tempWhatsApp, setTempWhatsApp] = useState<string>(storeSettings?.officialWhatsApp || '');
+  const [whatsAppSavedSuccess, setWhatsAppSavedSuccess] = useState<boolean>(false);
+  const [newSocialPlatform, setNewSocialPlatform] = useState<SocialPlatform>('instagram');
+  const [newSocialUrl, setNewSocialUrl] = useState<string>('');
+  const [socialError, setSocialError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (storeSettings?.officialWhatsApp) {
+      setTempWhatsApp(storeSettings.officialWhatsApp);
+    }
+  }, [storeSettings?.officialWhatsApp]);
+
+  const handleSaveWhatsApp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tempWhatsApp.trim()) return;
+    updateOfficialWhatsApp(tempWhatsApp.trim());
+    setWhatsAppSavedSuccess(true);
+    setTimeout(() => {
+      setWhatsAppSavedSuccess(false);
+    }, 3500);
+  };
+
+  const handleAddSocial = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSocialError(null);
+    let trimmed = newSocialUrl.trim();
+    if (!trimmed) {
+      setSocialError('يرجى كتابة رابط الحساب أو القناة');
+      return;
+    }
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      trimmed = 'https://' + trimmed;
+    }
+    addSocialLink({ platform: newSocialPlatform, url: trimmed });
+    setNewSocialUrl('');
+  };
+
+  const platformDisplayNames: Record<SocialPlatform, string> = {
+    instagram: 'إنستغرام (Instagram)',
+    facebook: 'فيسبوك (Facebook)',
+    tiktok: 'تيك توك (TikTok)',
+    whatsapp: 'واتساب (WhatsApp)',
+    telegram: 'تيليجرام (Telegram)',
+    youtube: 'يوتيوب (YouTube)',
+    snapchat: 'سناب شات (Snapchat)',
+    x: 'منصة X (تويتر)',
+  };
 
   // Handle Login
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -304,6 +364,13 @@ export default function AdminDashboard() {
   // Handle Add Promo Code Submit
   const handleSavePromoCode = (e: React.FormEvent) => {
     e.preventDefault();
+    const targetProd = products.find((p) => p.id === newCodeTargetProdId);
+    const targetData = {
+      targetType: newCodeTargetType,
+      targetProductId: newCodeTargetType === 'specific_product' ? newCodeTargetProdId : undefined,
+      targetProductName: newCodeTargetType === 'specific_product' && targetProd ? targetProd.name : undefined,
+    };
+
     if (editingPromo) {
       updatePromoCode(editingPromo.id, {
         code: newCodeStr,
@@ -311,6 +378,7 @@ export default function AdminDashboard() {
         marketerPhone: newCodePhone,
         discountType: newCodeType,
         discountValue: Number(newCodeValue),
+        ...targetData,
         maxUses: Number(newCodeMaxUses),
         expiryDate: newCodeExpiry,
         commissionType: newCodeCommType,
@@ -324,6 +392,7 @@ export default function AdminDashboard() {
         marketerPhone: newCodePhone,
         discountType: newCodeType,
         discountValue: Number(newCodeValue),
+        ...targetData,
         maxUses: Number(newCodeMaxUses),
         expiryDate: newCodeExpiry,
         commissionType: newCodeCommType,
@@ -342,6 +411,8 @@ export default function AdminDashboard() {
     setNewCodePhone(promo.marketerPhone);
     setNewCodeType(promo.discountType);
     setNewCodeValue(promo.discountValue);
+    setNewCodeTargetType(promo.targetType || 'all');
+    setNewCodeTargetProdId(promo.targetProductId || (products[0]?.id || ''));
     setNewCodeMaxUses(promo.maxUses);
     setNewCodeExpiry(promo.expiryDate);
     setNewCodeCommType(promo.commissionType);
@@ -355,6 +426,8 @@ export default function AdminDashboard() {
     setNewCodePhone('');
     setNewCodeType('percentage');
     setNewCodeValue(10);
+    setNewCodeTargetType('all');
+    setNewCodeTargetProdId(products[0]?.id || '');
     setNewCodeMaxUses(50);
     setNewCodeExpiry('2027-12-31');
     setNewCodeCommType('fixed');
@@ -528,6 +601,18 @@ export default function AdminDashboard() {
           >
             <Truck className="w-4 h-4" />
             <span>أسعار الشحن للمحافظات</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              activeTab === 'settings'
+                ? 'bg-amber-400 text-slate-950 shadow-md font-black'
+                : 'bg-[#0a182b] text-slate-300 hover:text-white border border-amber-500/20'
+            }`}
+          >
+            <Share2 className="w-4 h-4" />
+            <span>التواصل والسوشيال ميديا</span>
           </button>
 
         </div>
@@ -1056,11 +1141,23 @@ export default function AdminDashboard() {
                           <span className="text-slate-400">هاتف المسوق:</span>
                           <span className="text-amber-300 font-mono">{code.marketerPhone}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                           <span className="text-slate-400">قيمة الخصم للعميل:</span>
                           <span className="text-emerald-400 font-bold">
                             {code.discountValue} {code.discountType === 'percentage' ? '%' : 'ج.م'}
                           </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400">نطاق تطبيق الخصم:</span>
+                          {code.targetType === 'specific_product' ? (
+                            <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[11px] font-bold">
+                              🎯 {code.targetProductName || 'منتج محدد'}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[11px] font-bold">
+                              ✨ كل المنتجات
+                            </span>
+                          )}
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">عمولة المسوق لكل أوردر:</span>
@@ -1167,6 +1264,222 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* TAB 6: SETTINGS (WHATSAPP & SOCIAL MEDIA) */}
+        {activeTab === 'settings' && (
+          <div className="space-y-8">
+            
+            {/* Header info */}
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-white">إعدادات التواصل وحسابات السوشيال ميديا</h3>
+              <p className="text-xs text-slate-400">
+                تحكم برقم الواتساب الرسمي لخدمة العملاء وروابط صفحاتك على مواقع التواصل الاجتماعي لتظهر لجميع عملائك
+              </p>
+            </div>
+
+            {/* SECTION 1: OFFICIAL WHATSAPP */}
+            <div className="p-6 rounded-2xl bg-[#091526]/90 border border-amber-500/30 space-y-4 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-black text-white">رقم الواتساب الرسمي لخدمة العملاء</h4>
+                  <p className="text-xs text-slate-400">
+                    هذا الرقم يظهر في الزر العائم، أسفل الموقع (Footer)، ورسائل تأكيد الطلب للعملاء
+                  </p>
+                </div>
+              </div>
+
+              {whatsAppSavedSuccess && (
+                <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>تم حفظ وتحديث رقم الواتساب الرسمي بنجاح! تم ربطه مع كافة صفحات المتجر.</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveWhatsApp} className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                <div className="relative flex-1">
+                  <input
+                    type="tel"
+                    required
+                    value={tempWhatsApp}
+                    onChange={(e) => setTempWhatsApp(e.target.value)}
+                    placeholder="مثال: 01012345678"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#050b14] border border-amber-500/30 text-white font-mono text-base font-bold text-left focus:border-amber-400 focus:outline-none"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-mono">
+                    🇪🇬 مصر (+20)
+                  </span>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black text-xs sm:text-sm hover:brightness-110 shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>حفظ رقم الواتساب</span>
+                </button>
+              </form>
+
+              {tempWhatsApp && (
+                <div className="pt-2 flex items-center gap-2 text-xs">
+                  <span className="text-slate-400">معاينة رابط الدردشة:</span>
+                  <a
+                    href={`https://wa.me/2${tempWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent('مرحباً، أود الاستفسار عن عطور بلو لوتس الملكية')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-400 hover:text-emerald-300 font-mono underline flex items-center gap-1"
+                  >
+                    <span>فتح محادثة تجريبية على هذا الرقم</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* SECTION 2: SOCIAL MEDIA PLATFORMS */}
+            <div className="p-6 rounded-2xl bg-[#091526]/90 border border-amber-500/30 space-y-6 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-black text-white">منصات ومواقع التواصل الاجتماعي</h4>
+                  <p className="text-xs text-slate-400">
+                    أضف روابط حساباتك الرسمية لتظهر كأيقونات تفاعلية في أسفل المتجر (Footer)
+                  </p>
+                </div>
+              </div>
+
+              {/* Add New Social Link Form */}
+              <form onSubmit={handleAddSocial} className="p-4 rounded-xl bg-[#050b14] border border-amber-500/20 space-y-3">
+                <div className="text-xs font-bold text-amber-300">إضافة رابط منصة جديدة:</div>
+                
+                {socialError && (
+                  <div className="p-2.5 rounded-lg bg-red-950/80 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                    <span>{socialError}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-300 text-xs mb-1 font-bold">اختر المنصة:</label>
+                    <select
+                      value={newSocialPlatform}
+                      onChange={(e) => setNewSocialPlatform(e.target.value as SocialPlatform)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#0a182b] border border-amber-500/30 text-white text-xs font-bold focus:border-amber-400 focus:outline-none"
+                    >
+                      <option value="instagram">إنستغرام (Instagram)</option>
+                      <option value="facebook">فيسبوك (Facebook)</option>
+                      <option value="tiktok">تيك توك (TikTok)</option>
+                      <option value="whatsapp">واتساب (WhatsApp)</option>
+                      <option value="telegram">تيليجرام (Telegram)</option>
+                      <option value="youtube">يوتيوب (YouTube)</option>
+                      <option value="snapchat">سناب شات (Snapchat)</option>
+                      <option value="x">منصة X (تويتر سابقاً)</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-slate-300 text-xs mb-1 font-bold">رابط الصفحة أو الحساب:</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newSocialUrl}
+                        onChange={(e) => setNewSocialUrl(e.target.value)}
+                        placeholder="https://instagram.com/yourpage"
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#0a182b] border border-amber-500/30 text-white font-mono text-xs text-left focus:border-amber-400 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs hover:brightness-110 shrink-0 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>إضافة الرابط</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {/* Active Social Media Links List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h5 className="text-xs font-bold text-slate-300">الروابط المضافة حالياً وتظهر لعملائك:</h5>
+                  <span className="text-[11px] text-amber-400 font-mono">
+                    {storeSettings?.socialLinks?.length || 0} منصات مضافة
+                  </span>
+                </div>
+
+                {(!storeSettings?.socialLinks || storeSettings.socialLinks.length === 0) ? (
+                  <div className="text-center py-8 bg-[#050b14] rounded-xl border border-dashed border-slate-700 space-y-1">
+                    <Share2 className="w-8 h-8 mx-auto text-slate-600 mb-1" />
+                    <p className="text-slate-400 text-xs">لا يوجد روابط سوشيال ميديا مضافة بعد</p>
+                    <p className="text-[11px] text-slate-600">أضف حساباتك أعلاه لتظهر للعملاء في الفوتر</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {storeSettings.socialLinks.map((link) => (
+                      <div
+                        key={link.id}
+                        className="p-3.5 rounded-xl bg-[#07111e] border border-amber-500/20 flex items-center justify-between gap-3 hover:border-amber-500/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                            <Globe className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-white">
+                              {platformDisplayNames[link.platform] || link.platform}
+                            </div>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-slate-400 hover:text-amber-300 font-mono truncate block text-left"
+                              dir="ltr"
+                            >
+                              {link.url}
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-lg bg-[#0f2542] hover:bg-[#163864] text-amber-300 border border-amber-500/20"
+                            title="فتح الرابط"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`هل أنت متأكد من حذف رابط ${platformDisplayNames[link.platform]}؟`)) {
+                                deleteSocialLink(link.id);
+                              }
+                            }}
+                            className="p-2 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-500/30 cursor-pointer"
+                            title="حذف الرابط"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
 
           </div>
@@ -1479,6 +1792,66 @@ export default function AdminDashboard() {
                     className="w-full px-3 py-2 rounded-xl bg-[#050b14] border border-amber-500/30 text-emerald-300 font-bold focus:border-amber-400 focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Promo Code Scope (All Products vs Specific Product) */}
+              <div className="p-3.5 rounded-2xl bg-[#050b14] border border-amber-500/30 space-y-3">
+                <div>
+                  <label className="block text-slate-200 font-bold mb-1.5">
+                    نطاق تطبيق الخصم:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewCodeTargetType('all')}
+                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        newCodeTargetType === 'all'
+                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
+                          : 'bg-[#091526] border-slate-700 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <span>✨ كل المنتجات (عام)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewCodeTargetType('specific_product');
+                        if (!newCodeTargetProdId && products.length > 0) {
+                          setNewCodeTargetProdId(products[0].id);
+                        }
+                      }}
+                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        newCodeTargetType === 'specific_product'
+                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
+                          : 'bg-[#091526] border-slate-700 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <span>🎯 منتج محدد فقط</span>
+                    </button>
+                  </div>
+                </div>
+
+                {newCodeTargetType === 'specific_product' && (
+                  <div className="pt-2 border-t border-amber-500/20 space-y-1.5">
+                    <label className="block text-amber-300 font-bold mb-1">
+                      اختر المنتج المستهدف بالخصم: *
+                    </label>
+                    <select
+                      value={newCodeTargetProdId}
+                      onChange={(e) => setNewCodeTargetProdId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#091526] border border-amber-500/40 text-white font-bold focus:border-amber-400 focus:outline-none"
+                    >
+                      {products.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} — {p.price} ج.م ({p.category})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-slate-400">
+                      سيتم تطبيق الخصم وقبوله فقط إذا احتوت سلة مشتريات العميل على هذا المنتج المحدد.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

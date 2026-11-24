@@ -1,4 +1,4 @@
-import { Product, PromoCode, Order, GovernorateShipping } from '../types';
+import { Product, PromoCode, Order, GovernorateShipping, StoreSettings } from '../types';
 
 export const INITIAL_GOVERNORATES: GovernorateShipping[] = [
   { id: 'cairo', nameAr: 'القاهرة', nameEn: 'Cairo', cost: 50 },
@@ -94,3 +94,13 @@ export const INITIAL_PROMO_CODES: PromoCode[] = [];
 
 // Start clean without dummy orders
 export const INITIAL_ORDERS: Order[] = [];
+
+// Initial Store Contact & Social Settings
+export const INITIAL_SETTINGS: StoreSettings = {
+  officialWhatsApp: '01012345678',
+  socialLinks: [
+    { id: 'soc-1', platform: 'instagram', url: 'https://instagram.com' },
+    { id: 'soc-2', platform: 'facebook', url: 'https://facebook.com' },
+    { id: 'soc-3', platform: 'tiktok', url: 'https://tiktok.com' },
+  ],
+};

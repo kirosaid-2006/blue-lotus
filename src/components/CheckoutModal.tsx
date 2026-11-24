@@ -48,7 +48,7 @@ export default function CheckoutModal() {
   // Validate Promo Code
   const handleApplyPromo = () => {
     if (!promoCodeInput.trim()) return;
-    const res = validatePromoCode(promoCodeInput, subtotal);
+    const res = validatePromoCode(promoCodeInput, subtotal, cart);
     if (res.valid && res.promoCode) {
       setAppliedPromo(res.promoCode.code);
       setPromoDiscount(res.discountAmount);
